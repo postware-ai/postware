@@ -1,10 +1,10 @@
 {
   "mcpServers": {
-    "models": {
+    "postware": {
       "type": "http",
-      "url": "${A_URL}/w/${A_WORKSPACE}/mcp",
+      "url": "${POSTWARE_URL}/w/${POSTWARE_WORKSPACE}/mcp",
       "headers": {
-        "Authorization": "Bearer ${A_TOKEN}"
+        "Authorization": "Bearer ${POSTWARE_API_KEY}"
       }
     }
   }

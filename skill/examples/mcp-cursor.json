@@ -1,9 +1,9 @@
 {
   "mcpServers": {
-    "models": {
-      "url": "${env:A_URL}/w/${env:A_WORKSPACE}/mcp",
+    "postware": {
+      "url": "${env:POSTWARE_URL}/w/${env:POSTWARE_WORKSPACE}/mcp",
       "headers": {
-        "Authorization": "Bearer ${env:A_TOKEN}"
+        "Authorization": "Bearer ${env:POSTWARE_API_KEY}"
       }
     }
   }

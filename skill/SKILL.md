@@ -16,12 +16,12 @@ To create one, follow the guide at `https://postware.ai/docs-md/start`: it makes
 Either way, keep the values in the environment, never in a file the agent commits:
 
 ```sh
-export A_URL=<the workspace's API URL>
-export A_WORKSPACE=<the workspace slug>
-export A_TOKEN=<the API key>
+export POSTWARE_URL=<the workspace's API URL>
+export POSTWARE_WORKSPACE=<the workspace slug>
+export POSTWARE_API_KEY=<the API key>
 ```
 
-Check the connection: `curl -s -H "Authorization: Bearer $A_TOKEN" $A_URL/w/$A_WORKSPACE/v1/me`.
+Check the connection: `curl -s -H "Authorization: Bearer $POSTWARE_API_KEY" $POSTWARE_URL/w/$POSTWARE_WORKSPACE/v1/me`.
 
 ## 2. Read the schema first
 
@@ -36,7 +36,7 @@ Without MCP, `GET /w/{ws}/v1/schema/{model}` returns the same document.
 
 ## 3. Add the MCP server to the client
 
-Claude Code: copy `examples/mcp-claude-code.json` into the project's `.mcp.json`. Cursor: copy `examples/mcp-cursor.json` into `.cursor/mcp.json`. Both read the server URL, workspace and token from the environment; never paste the token into the file. The endpoint is `{A_URL}/w/{A_WORKSPACE}/mcp` (Streamable HTTP, bearer auth; an OAuth flow starts automatically when the client supports it and no token is set).
+Claude Code: copy `examples/mcp-claude-code.json` into the project's `.mcp.json`. Cursor: copy `examples/mcp-cursor.json` into `.cursor/mcp.json`. Both read the server URL, workspace and token from the environment; never paste the token into the file. The endpoint is `{POSTWARE_URL}/w/{POSTWARE_WORKSPACE}/mcp` (Streamable HTTP, bearer auth; an OAuth flow starts automatically when the client supports it and no token is set).
 
 The tools appear with the prefix `a_`: `a_schema_describe`, `a_record_query`, `a_record_get`, `a_record_create`, `a_record_update`, `a_record_upsert`, `a_record_delete`, `a_record_batch`, `a_record_search`, `a_import_run`, `a_export_run`. Resources `schema://index` and `schema://{model}` carry the model reference as Markdown.
 

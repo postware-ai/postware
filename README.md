@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/banner.png" alt="Postware: the system of record for agents." width="100%">
+</p>
+
 # Postware
 
 An open standard of business data models for companies run by agents.
@@ -38,7 +42,7 @@ Start a workspace at [postware.ai](https://postware.ai), then give your coding a
 ```ts
 import { Postware } from "@postware/sdk";
 
-const a = new Postware({ baseUrl: process.env.A_URL!, workspace: process.env.A_WORKSPACE!, token: process.env.A_TOKEN });
+const a = new Postware({ baseUrl: process.env.POSTWARE_URL!, workspace: process.env.POSTWARE_WORKSPACE!, token: process.env.POSTWARE_API_KEY });
 
 const page = await a.person.query({ where: { "emails.value": "ada@example.com" }, limit: 10 });
 ```

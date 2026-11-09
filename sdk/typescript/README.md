@@ -5,7 +5,7 @@ Typed TypeScript client for a workspace served by the Postware API. The types in
 ```ts
 import { Postware } from "@postware/sdk";
 
-const a = new Postware({ baseUrl: process.env.A_URL!, workspace: "acme", token: process.env.A_TOKEN });
+const a = new Postware({ baseUrl: process.env.POSTWARE_URL!, workspace: "acme", token: process.env.POSTWARE_API_KEY });
 
 // records, typed per model
 const page = await a.person.query({ where: { "emails.value": "jane@example.com" }, limit: 10 });

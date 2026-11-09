@@ -1,6 +1,6 @@
 # Scaffold walkthrough
 
-A product with end-user sign-in, plans and charges, on `@postware/sdk`. Environment: `A_URL`, `A_WORKSPACE`, `A_TOKEN` (an API key of an agent Member for server-side code; end users get their own tokens through the magic link flow).
+A product with end-user sign-in, plans and charges, on `@postware/sdk`. Environment: `POSTWARE_URL`, `POSTWARE_WORKSPACE`, `POSTWARE_API_KEY` (an API key of an agent Member for server-side code; end users get their own tokens through the magic link flow).
 
 ## Server side: one client per request
 
@@ -8,14 +8,14 @@ A product with end-user sign-in, plans and charges, on `@postware/sdk`. Environm
 import { Postware } from "@postware/sdk";
 
 export const admin = new Postware({
-  baseUrl: process.env.A_URL!,
-  workspace: process.env.A_WORKSPACE!,
-  token: process.env.A_TOKEN!, // an API key; acts as its Member
+  baseUrl: process.env.POSTWARE_URL!,
+  workspace: process.env.POSTWARE_WORKSPACE!,
+  token: process.env.POSTWARE_API_KEY!, // an API key; acts as its Member
 });
 
 // A client acting as the signed-in end user (its access token from the browser).
 export function asUser(accessToken: string) {
-  return new Postware({ baseUrl: process.env.A_URL!, workspace: process.env.A_WORKSPACE!, token: accessToken });
+  return new Postware({ baseUrl: process.env.POSTWARE_URL!, workspace: process.env.POSTWARE_WORKSPACE!, token: accessToken });
 }
 ```
 
@@ -125,4 +125,4 @@ await admin.batch(
 );
 ```
 
-Run the same batch with `dryRun: false` once it validates. Published Documents in a public Collection are readable without a token at `GET {A_URL}/p/{workspace}/document`.
+Run the same batch with `dryRun: false` once it validates. Published Documents in a public Collection are readable without a token at `GET {POSTWARE_URL}/p/{workspace}/document`.
