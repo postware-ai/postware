@@ -2,27 +2,41 @@
   <img src="docs/banner.png" alt="Postware: the system of record for agents." width="100%">
 </p>
 
+<p align="center">
+  <a href="https://postware.ai">Website</a> · <a href="https://postware.ai/docs">Docs</a> · <a href="https://postware.ai/docs/models">Models</a> · <a href="https://postware.ai/pricing">Pricing</a>
+</p>
+
 # Postware
 
-Open, ready-made data models and skills for customers, deals, invoices, support tickets and more.
+Give your agents ready-made data models and skills for everything your company needs, from customers and deals to invoices and support tickets. Fully hosted at [postware.ai](https://postware.ai), so you can finally ditch your SaaS stack.
 
-One workspace holds a company's customers, deals, invoices, subscriptions, tickets, tasks, content and files as standard records. Every agent and every product reads and writes the same models, so the company's data stays in one place and in one shape. Postware runs it for you at [postware.ai](https://postware.ai).
+**The Postware standards live in this repo, and they are open source.** The data models, specs and agent skill are all here under the Apache 2.0 license, so anyone can read them, build on them or propose a change.
 
-## What is here
+## Get started
+
+Paste this into your agent. It creates a workspace, connects itself and installs the skill.
+
+```text
+Set up Postware. Create a Postware cloud workspace, connect it here, install its skill, and ask me only when you need my email. Follow https://postware.ai/docs/start.md
+```
+
+Free tier included. No card needed.
+
+## What's in this repo
 
 | Path | What it holds |
 |---|---|
-| [`standard/`](standard/README.md) | the standard: model definitions, value types, extensions, default policies, importer manifests, conformance fixtures and test vectors, and the compiled artifacts in `dist/` |
-| [`docs/spec/`](docs/spec) | the specs: the [schema](docs/spec/01-schema.md), the [query grammar](docs/spec/02-query.md), and [policies and shares](docs/spec/04-policy-share.md) |
-| [`sdk/typescript/`](sdk/typescript/README.md) | `@postware/sdk`, the typed TypeScript client |
-| [`skill/`](skill/SKILL.md) | the skill that teaches a coding agent to start a company on a workspace |
-| [`rfcs/`](rfcs/README.md) | proposed changes to the standard |
+| [`standard/`](standard/README.md) | The models, value types, extensions, default policies and conformance tests, plus compiled JSON Schema, OpenAPI and MCP tool definitions |
+| [`docs/spec/`](docs/spec) | The specs for the [schema](docs/spec/01-schema.md), the [query grammar](docs/spec/02-query.md), and [policies and shares](docs/spec/04-policy-share.md) |
+| [`skill/`](skill/SKILL.md) | The skill that teaches an agent to run a company on a workspace |
+| [`sdk/typescript/`](sdk/typescript/README.md) | The source of `@postware/sdk`, a typed TypeScript client (not on npm yet) |
+| [`rfcs/`](rfcs/README.md) | Proposed changes to the standards |
 
-## The models
+## 27 models, ready to use
 
-Twenty-seven models in six groups.
+Every workspace includes all of them. Each one is versioned and written for an agent to read and use correctly.
 
-| Group | Models |
+| Pack | Models |
 |---|---|
 | System | workspace, member, identity, policy, share, tag, import_run |
 | Core | person, organization, team, project, task, event, note, message, file, product |
@@ -31,26 +45,12 @@ Twenty-seven models in six groups.
 | Support | ticket |
 | Content | collection, document |
 
-Each model is one YAML file in `standard/models/`, with a stable URN, typed fields, identity rules that decide what counts as a duplicate, status categories, and prose written for the agents that use it. The compiled artifacts in `standard/dist/` include JSON Schema, OpenAPI, MCP tool definitions and a model reference.
-
-Every model, field and extension has a URN. Majors are new URN versions and minors are additive. [`standard/README.md`](standard/README.md) explains the layout, the URN scheme, the versioning rules and how to propose a change.
-
-## Use it
-
-Start a workspace at [postware.ai](https://postware.ai), then give your coding agent the [skill](skill/SKILL.md), or use the SDK directly:
-
-```ts
-import { Postware } from "@postware/sdk";
-
-const a = new Postware({ baseUrl: process.env.POSTWARE_URL!, workspace: process.env.POSTWARE_WORKSPACE!, token: process.env.POSTWARE_API_KEY });
-
-const page = await a.person.query({ where: { "emails.value": "ada@example.com" }, limit: 10 });
-```
+Each model is one YAML file in [`standard/models/`](standard/models), with a stable URN, typed fields, identity rules that decide what counts as a duplicate, and status categories. Major changes get a new URN version and minor changes only add. [`standard/README.md`](standard/README.md) explains the layout, the versioning rules and how to propose a change.
 
 ## Contributing
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md). Changes to the standard that are not additive go through an RFC in `rfcs/`.
+The standards are open, so changes are welcome. See [`CONTRIBUTING.md`](CONTRIBUTING.md). Changes that are not additive go through an RFC in [`rfcs/`](rfcs/README.md).
 
-## Licence
+## License
 
 Apache License, Version 2.0: [`LICENSE`](LICENSE).
