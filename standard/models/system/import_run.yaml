@@ -1,0 +1,27 @@
+urn: urn:postware:system:import_run
+name: import_run
+title: Import run
+version: 1
+group: system
+description: "One execution of an importer: which importer, in which mode, with what outcome and per-model counts. Every record it wrote carries its id in source.import_run."
+agent_context: |
+  An ImportRun is created by import_run or `a import`, never by hand; read it for the counts and the errors, and
+  always run with dry_run first. Find what a run wrote by querying source.import_run. The one mistake: retrying a
+  partial run without reading its errors; the rows that succeeded are already upserted and simply update again.
+identity: []
+fields:
+  importer:    { type: string, required: true, description: "csv, stripe, supabase, ..." }
+  mode:        { type: enum, values: [once, continuous], required: true }
+  status:      { type: enum, values: [running, succeeded, failed, partial], required: true }
+  dry_run:     { type: bool, required: true, default: false }
+  started_at:  { type: datetime, required: true }
+  finished_at: { type: datetime }
+  counts:      { type: object, required: true, description: "per model: {created, updated, skipped, errors}" }
+  errors:
+    type: object
+    list: true
+    fields:
+      row:     { type: int, description: "the source row, 1-based, header excluded" }
+      path:    { type: string, description: the field path that failed }
+      code:    { type: string, required: true }
+      message: { type: string, required: true }

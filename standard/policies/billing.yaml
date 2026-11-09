@@ -1,0 +1,43 @@
+# Default policies of the billing pack. See policies/core.yaml for the shape and the rules.
+#
+# An end user reads the Invoices, Subscriptions and Payments where it is the counterparty, or where
+# the counterparty is an Organization it is affiliated with (@principal.affiliated_organizations is the
+# list of organization ids from the Person's affiliations[]). Nothing is writable by end users.
+#
+# Source: docs/spec/04-policy-share.md section 4 (billing) and the example in section 2.
+
+- name: end user reads own invoices
+  principal: { kind: end_user }
+  applies_to: invoice
+  actions: [read]
+  where:
+    or:
+      - { counterparty: "@principal.person" }
+      - { "counterparty.model": organization, counterparty: { in: "@principal.affiliated_organizations" } }
+  fields: null
+  enabled: true
+  origin: pack
+
+- name: end user reads own subscriptions
+  principal: { kind: end_user }
+  applies_to: subscription
+  actions: [read]
+  where:
+    or:
+      - { counterparty: "@principal.person" }
+      - { "counterparty.model": organization, counterparty: { in: "@principal.affiliated_organizations" } }
+  fields: null
+  enabled: true
+  origin: pack
+
+- name: end user reads own payments
+  principal: { kind: end_user }
+  applies_to: payment
+  actions: [read]
+  where:
+    or:
+      - { counterparty: "@principal.person" }
+      - { "counterparty.model": organization, counterparty: { in: "@principal.affiliated_organizations" } }
+  fields: null
+  enabled: true
+  origin: pack

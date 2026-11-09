@@ -1,0 +1,36 @@
+urn: urn:postware:billing:subscription
+name: subscription
+title: Subscription
+version: 1
+group: billing
+description: A recurring agreement to bill (receivable) or be billed (payable) for Prices, period after period. Each period's charge is an Invoice that points back at it.
+agent_context: |
+  Subscription is the recurring relationship; each period's charge is an Invoice that references it. status pending
+  means it exists but has not started, so current_period and started_at are absent; cancel_at set means it will
+  not renew; ended_at is when it stopped. Dedupe by identifier (the billing provider's subscription id). The one
+  mistake: cancelled without ended_at and cancel_at; the dates are what the status means.
+identity:
+  - [identifiers]
+status:
+  categories: [pending, trialing, active, past_due, paused, cancelled]
+fields:
+  direction:      { type: enum, values: [receivable, payable], required: true, default: receivable, description: "receivable = our customer; payable = a vendor we pay" }
+  counterparty:   { type: ref, to: [organization, person], required: true }
+  items:
+    type: object
+    list: true
+    required: true
+    fields:
+      price:    { type: ref, to: [price], required: true }
+      quantity: { type: decimal, required: true, default: "1" }
+  status:         { type: Status, required: true }
+  current_period: { type: Period, description: "the period being billed now; absent while pending" }
+  started_at:     { type: datetime }
+  trial_end:      { type: datetime }
+  cancel_at:      { type: datetime, description: "scheduled end; when set the subscription does not renew" }
+  ended_at:       { type: datetime }
+  reference:      { type: string, description: "the customer's PO or reference, copied onto generated invoices" }
+events:
+  - { field: status.category, to: cancelled, name: subscription.cancelled }
+  - { field: status.category, to: active, name: subscription.activated }
+  - { field: status.category, to: past_due, name: subscription.past_due }

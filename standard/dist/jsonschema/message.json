@@ -1,0 +1,313 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:postware:core:message",
+  "title": "Message",
+  "description": "One message on a channel: an email, a chat message, an SMS, a call record, with sender, recipients, body and the records it is about. A Ticket's conversation is its Messages.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "ULID; generated when absent"
+    },
+    "model": {
+      "type": "string",
+      "description": "name@version",
+      "readOnly": true
+    },
+    "workspace": {
+      "type": "string",
+      "description": "the Workspace record id",
+      "readOnly": true
+    },
+    "revision": {
+      "type": "integer",
+      "description": "optimistic concurrency with If-Match",
+      "readOnly": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "created_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind: member|person|share|system, id}",
+      "readOnly": true
+    },
+    "updated_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind, id}",
+      "readOnly": true
+    },
+    "owner": {
+      "type": "string",
+      "description": "Member id, the accountable operator"
+    },
+    "identifiers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "description": "Identifier[]: the crosswalk"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^([a-z0-9][a-z0-9_-]{0,63}:)?[a-z0-9][a-z0-9_-]{0,63}(/[a-z0-9][a-z0-9_-]{0,63})*$"
+      },
+      "description": "tag slugs, `namespace:slug` form"
+    },
+    "ext": {
+      "type": "object",
+      "description": "declared extensions only"
+    },
+    "source": {
+      "type": "object",
+      "description": "{system, external_id, created_at, updated_at, deleted_at?, import_run, imported_at, payload}"
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "soft delete",
+      "readOnly": true
+    },
+    "channel": {
+      "type": "string",
+      "enum": [
+        "email",
+        "chat",
+        "sms",
+        "phone",
+        "web",
+        "social",
+        "api",
+        "other"
+      ]
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "inbound",
+        "outbound",
+        "internal"
+      ]
+    },
+    "from": {
+      "$ref": "#/$defs/Participant"
+    },
+    "to": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Participant"
+      }
+    },
+    "cc": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Participant"
+      }
+    },
+    "bcc": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Participant"
+      }
+    },
+    "reply_to": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Participant"
+      }
+    },
+    "subject": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "body": {
+      "type": "string",
+      "contentMediaType": "text/markdown",
+      "description": "plain text or Markdown; may be empty when the message is only attachments"
+    },
+    "body_html": {
+      "type": "string",
+      "contentMediaType": "text/markdown"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "thread_key": {
+      "type": "string",
+      "maxLength": 4000,
+      "description": "opaque grouping key: a mail thread id, a chat channel and thread, a ticket id"
+    },
+    "in_reply_to": {
+      "$ref": "#/$defs/Ref",
+      "x-to": [
+        "message"
+      ]
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Ref",
+        "x-to": [
+          "file"
+        ]
+      }
+    },
+    "delivery": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "queued",
+        "sent",
+        "delivered",
+        "failed"
+      ],
+      "description": "outbound only"
+    },
+    "about": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Ref"
+      },
+      "description": "the Ticket, the Deal"
+    }
+  },
+  "required": [
+    "id",
+    "model",
+    "workspace",
+    "revision",
+    "created_at",
+    "updated_at",
+    "created_by",
+    "updated_by",
+    "channel",
+    "direction",
+    "from",
+    "body",
+    "sent_at"
+  ],
+  "additionalProperties": false,
+  "x-model": {
+    "name": "message",
+    "version": 1,
+    "group": "core",
+    "identity": [
+      [
+        "identifiers"
+      ]
+    ],
+    "status_categories": [],
+    "sensitivity": {},
+    "events": null,
+    "agent_context": "Message is a communication that happened or will be sent; internal commentary is a Note. Link it to the Ticket or\nDeal through about and to its thread through thread_key. Dedupe by identifier: email:message-id (the Message-ID\nwithout angle brackets) for mail, slack:ts for chat, \u003csource\u003e:message otherwise. The one mistake: setting\ndelivery on an inbound Message; delivery describes outbound sending."
+  },
+  "$defs": {
+    "Ref": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "Principal": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "member",
+            "person",
+            "share",
+            "system"
+          ]
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "Identifier": {
+      "type": "object",
+      "properties": {
+        "system": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "primary": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "system",
+        "value"
+      ],
+      "additionalProperties": false,
+      "description": "An external or natural key. `system` is a registered scheme (email, domain, vat:eu, sha256, stripe:customer, postware:workspace)."
+    },
+    "Participant": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/Ref",
+          "x-to": [
+            "person",
+            "member"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "address": {
+          "type": "string",
+          "maxLength": 4000,
+          "description": "email address, phone number or handle, as the channel writes it"
+        },
+        "role": {
+          "type": "string",
+          "maxLength": 4000,
+          "description": "events: required, optional or resource (iCalendar ROLE and CUTYPE)"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "accepted",
+            "declined",
+            "tentative",
+            "needs_action"
+          ],
+          "description": "events: the participation status (iCalendar PARTSTAT)"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A person or address taking part in a message or an event (an RFC 5322 mailbox, a JMAP EmailAddress, an iCalendar ATTENDEE or ORGANIZER). Every field is optional; ref names the Person or Member when one is known, address carries the email, phone number or handle as the channel wrote it."
+    }
+  }
+}

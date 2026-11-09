@@ -1,0 +1,366 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:postware:system:workspace",
+  "title": "Workspace",
+  "description": "The tenant: one company or one person, holding exactly one of these records, its first. Holds the installed packs and the members, identities, policies, shares, tags and records.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "ULID; generated when absent"
+    },
+    "model": {
+      "type": "string",
+      "description": "name@version",
+      "readOnly": true
+    },
+    "workspace": {
+      "type": "string",
+      "description": "the Workspace record id",
+      "readOnly": true
+    },
+    "revision": {
+      "type": "integer",
+      "description": "optimistic concurrency with If-Match",
+      "readOnly": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "created_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind: member|person|share|system, id}",
+      "readOnly": true
+    },
+    "updated_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind, id}",
+      "readOnly": true
+    },
+    "owner": {
+      "type": "string",
+      "description": "Member id, the accountable operator"
+    },
+    "identifiers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "description": "Identifier[]: the crosswalk"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^([a-z0-9][a-z0-9_-]{0,63}:)?[a-z0-9][a-z0-9_-]{0,63}(/[a-z0-9][a-z0-9_-]{0,63})*$"
+      },
+      "description": "tag slugs, `namespace:slug` form"
+    },
+    "ext": {
+      "type": "object",
+      "description": "declared extensions only"
+    },
+    "source": {
+      "type": "object",
+      "description": "{system, external_id, created_at, updated_at, deleted_at?, import_run, imported_at, payload}"
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "soft delete",
+      "readOnly": true
+    },
+    "slug": {
+      "type": "string",
+      "maxLength": 4000,
+      "pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+      "description": "URL-safe, unique per server or platform"
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "business",
+        "personal",
+        "platform"
+      ],
+      "default": "business"
+    },
+    "status": {
+      "$ref": "#/$defs/Status",
+      "x-categories": [
+        "active",
+        "paused",
+        "suspended",
+        "deleted"
+      ],
+      "default": {
+        "category": "active"
+      }
+    },
+    "avatar": {
+      "$ref": "#/$defs/Ref",
+      "x-to": [
+        "file"
+      ]
+    },
+    "packs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 4000
+      },
+      "description": "installed packs",
+      "default": []
+    },
+    "auth": {
+      "type": "object",
+      "properties": {
+        "allowed_email_domains": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "description": "when set, only these domains may sign up as end users"
+        },
+        "allowed_redirect_uris": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "description": "redirect URIs the magic-link and OAuth flows may return to; localhost is always allowed"
+        },
+        "allowed_origins": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "description": "CORS origins"
+        },
+        "magic_link_from_name": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "signup": {
+          "type": "string",
+          "enum": [
+            "open",
+            "invite_only"
+          ],
+          "description": "whether an unknown email may create an end user",
+          "default": "open"
+        },
+        "issuers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "issuer": {
+                "type": "string",
+                "maxLength": 4000
+              },
+              "audience": {
+                "type": "string",
+                "maxLength": 4000
+              },
+              "jwks_uri": {
+                "type": "string",
+                "maxLength": 4000
+              },
+              "claims": {
+                "type": "object",
+                "properties": {
+                  "subject": {
+                    "type": "string",
+                    "maxLength": 4000,
+                    "default": "sub"
+                  },
+                  "email": {
+                    "type": "string",
+                    "maxLength": 4000,
+                    "default": "email"
+                  },
+                  "email_verified": {
+                    "type": "string",
+                    "maxLength": 4000,
+                    "default": "email_verified"
+                  },
+                  "name": {
+                    "type": "string",
+                    "maxLength": 4000,
+                    "default": "name"
+                  },
+                  "roles": {
+                    "type": "string",
+                    "maxLength": 4000
+                  }
+                },
+                "additionalProperties": false,
+                "description": "which claim carries each value"
+              },
+              "principal": {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "end_user",
+                      "member"
+                    ]
+                  },
+                  "member_role_claim_values": {
+                    "type": "object",
+                    "additionalProperties": true,
+                    "description": "role name to claim value, for member issuers"
+                  },
+                  "auto_join": {
+                    "type": "boolean",
+                    "description": "for member issuers: add anyone the issuer vouches for as a Member; off means invited or bound people only"
+                  }
+                },
+                "required": [
+                  "kind"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "issuer",
+              "audience"
+            ],
+            "additionalProperties": false
+          },
+          "description": "external OIDC issuers this workspace trusts"
+        }
+      },
+      "additionalProperties": false,
+      "description": "sign-in settings"
+    }
+  },
+  "required": [
+    "id",
+    "model",
+    "workspace",
+    "revision",
+    "created_at",
+    "updated_at",
+    "created_by",
+    "updated_by",
+    "slug",
+    "name",
+    "status",
+    "packs"
+  ],
+  "additionalProperties": false,
+  "x-model": {
+    "name": "workspace",
+    "version": 1,
+    "group": "system",
+    "identity": [
+      [
+        "slug"
+      ]
+    ],
+    "status_categories": [
+      "active",
+      "paused",
+      "suspended",
+      "deleted"
+    ],
+    "sensitivity": {},
+    "events": null,
+    "agent_context": "Workspace is the tenant. You never create one; provisioning does, and a workspace holds exactly one of these\nrecords. Read it for the installed packs and the sign-in settings. Dedupe by slug. The one mistake: updating auth\nwithout reading it first; the object is replaced whole on update."
+  },
+  "$defs": {
+    "Ref": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "Principal": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "member",
+            "person",
+            "share",
+            "system"
+          ]
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "Identifier": {
+      "type": "object",
+      "properties": {
+        "system": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "primary": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "system",
+        "value"
+      ],
+      "additionalProperties": false,
+      "description": "An external or natural key. `system` is a registered scheme (email, domain, vat:eu, sha256, stripe:customer, postware:workspace)."
+    },
+    "Status": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "state": {
+          "type": "string",
+          "maxLength": 4000
+        }
+      },
+      "required": [
+        "category"
+      ],
+      "additionalProperties": false,
+      "description": "category is the standard (validated per model); state is the workspace's own label."
+    }
+  }
+}

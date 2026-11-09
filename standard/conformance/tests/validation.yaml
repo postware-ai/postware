@@ -1,0 +1,354 @@
+# Validation vectors. Each case is a create body; `valid: true` must succeed, `valid: false` must fail with
+# 400 validation_failed whose details contain exactly this code at this path. Format: conformance/README.md.
+
+- name: person with only a name is valid
+  model: person
+  record: { name: { full: "Ada Okonkwo" } }
+  valid: true
+
+- name: person without a name is rejected
+  model: person
+  record: { emails: [ { value: "ada@lumenharbor.example" } ] }
+  valid: false
+  error: { code: required, path: name }
+
+- name: a Name needs its full form
+  model: person
+  record: { name: { given: "Ada" } }
+  valid: false
+  error: { code: required, path: name.full }
+
+- name: a contact point label outside the enum is rejected
+  model: person
+  record: { name: { full: "Ada Okonkwo" }, phones: [ { value: "+44 7700 900123", label: pager } ] }
+  valid: false
+  error: { code: invalid_enum, path: phones.0.label }
+
+- name: an address country must be ISO 3166-1 alpha-2
+  model: person
+  record: { name: { full: "Ada Okonkwo" }, addresses: [ { lines: ["12 Quay Street"], country: "GBR" } ] }
+  valid: false
+  error: { code: pattern, path: addresses.0.country }
+
+- name: an undeclared extension is rejected
+  model: person
+  record: { name: { full: "Ada Okonkwo" }, ext: { acme: { territory: "south" } } }
+  valid: false
+  error: { code: extension_undeclared, path: ext.acme.territory }
+
+- name: a declared enum extension rejects values outside its enum
+  model: person
+  record: { name: { full: "Ada Okonkwo" }, ext: { crm: { lifecycle_stage: "mql" } } }
+  valid: false
+  error: { code: invalid_enum, path: ext.crm.lifecycle_stage }
+
+- name: a declared extension with a valid value is accepted
+  model: person
+  record: { name: { full: "Ada Okonkwo" }, job_title: "Head of Operations", ext: { crm: { lifecycle_stage: marketing_qualified_lead, source: "referral" } } }
+  valid: true
+
+- name: an organization with identifiers is valid
+  model: organization
+  record: { name: "Lumen Harbor", identifiers: [ { system: domain, value: "lumenharbor.example", primary: true } ], ext: { billing: { legal_name: "Lumen Harbor Marinas Ltd" } } }
+  valid: true
+
+- name: a field the model does not declare is rejected
+  model: task
+  record: { title: "Ship it", status: { category: open }, foo: "bar" }
+  valid: false
+  error: { code: unknown_field, path: foo }
+
+- name: a former core field that became an extension is unknown as a field
+  model: task
+  record: { title: "Ship it", status: { category: open }, estimate: "PT2H" }
+  valid: false
+  error: { code: unknown_field, path: estimate }
+
+- name: a datetime must be RFC 3339
+  model: task
+  record: { title: "Ship it", status: { category: open }, due_at: "tomorrow" }
+  valid: false
+  error: { code: invalid_type, path: due_at }
+
+- name: an enum outside its values is rejected
+  model: product
+  record: { name: "Pro plan", kind: subscription, active: true }
+  valid: false
+  error: { code: invalid_enum, path: kind }
+
+- name: a reference to a model outside `to` is rejected
+  model: deal
+  record:
+    name: "Lumen Harbor: Pro plan"
+    organization: { model: person, $fixture: person-ada }
+    pipeline: { model: pipeline, $fixture: pipe-sales }
+    stage: lead
+    status: { category: open }
+  valid: false
+  error: { code: ref_model_not_allowed, path: organization }
+
+- name: a deal contact needs its person
+  model: deal
+  record:
+    name: "Lumen Harbor: Pro plan"
+    pipeline: { model: pipeline, $fixture: pipe-sales }
+    stage: lead
+    status: { category: open }
+    people: [ { primary: true, role: "decision maker" } ]
+  valid: false
+  error: { code: required, path: people.0.person }
+
+- name: a ticket requester must be a person
+  model: ticket
+  record:
+    subject: "Berth import skipped rows"
+    requester: { model: organization, $fixture: org-lumen-harbor }
+    status: { category: new }
+  valid: false
+  error: { code: ref_model_not_allowed, path: requester }
+
+- name: money amounts are decimal strings, never numbers
+  model: payment
+  record:
+    direction: receivable
+    kind: payment
+    counterparty: { model: person, $fixture: person-rafael }
+    amount: { amount: 4.00, currency: USD }
+    paid_at: "2026-10-28T19:02:00Z"
+    method: wallet
+    status: { category: succeeded }
+  valid: false
+  error: { code: invalid_type, path: amount.amount }
+
+- name: a quantity is a decimal string too
+  model: invoice
+  record:
+    number: "INV-0100"
+    direction: receivable
+    counterparty: { model: person, $fixture: person-rafael }
+    status: { category: open }
+    issued_at: "2026-11-06"
+    due_at: "2026-11-20"
+    currency: USD
+    tax_inclusive: false
+    lines:
+      - { description: "Starter plan", quantity: 1, unit_price: { amount: "9.00", currency: USD }, amount: { amount: "9.00", currency: USD } }
+    subtotal: { amount: "9.00", currency: USD }
+    tax_total: { amount: "0.00", currency: USD }
+    total: { amount: "9.00", currency: USD }
+    amount_paid: { amount: "0.00", currency: USD }
+    amount_due: { amount: "9.00", currency: USD }
+  valid: false
+  error: { code: invalid_type, path: lines.0.quantity }
+
+- name: a currency code is upper-case ISO 4217
+  model: invoice
+  record:
+    number: "INV-0101"
+    direction: receivable
+    counterparty: { model: person, $fixture: person-rafael }
+    status: { category: open }
+    issued_at: "2026-11-06"
+    due_at: "2026-11-20"
+    currency: usd
+    tax_inclusive: false
+    lines:
+      - { description: "Starter plan", quantity: "1", unit_price: { amount: "9.00", currency: USD }, amount: { amount: "9.00", currency: USD } }
+    subtotal: { amount: "9.00", currency: USD }
+    tax_total: { amount: "0.00", currency: USD }
+    total: { amount: "9.00", currency: USD }
+    amount_paid: { amount: "0.00", currency: USD }
+    amount_due: { amount: "9.00", currency: USD }
+  valid: false
+  error: { code: pattern, path: currency }
+
+- name: dates are YYYY-MM-DD
+  model: invoice
+  record:
+    number: "INV-0102"
+    direction: receivable
+    counterparty: { model: person, $fixture: person-rafael }
+    status: { category: open }
+    issued_at: "11/06/2026"
+    due_at: "2026-11-20"
+    currency: USD
+    tax_inclusive: false
+    lines:
+      - { description: "Starter plan", quantity: "1", unit_price: { amount: "9.00", currency: USD }, amount: { amount: "9.00", currency: USD } }
+    subtotal: { amount: "9.00", currency: USD }
+    tax_total: { amount: "0.00", currency: USD }
+    total: { amount: "9.00", currency: USD }
+    amount_paid: { amount: "0.00", currency: USD }
+    amount_due: { amount: "9.00", currency: USD }
+  valid: false
+  error: { code: invalid_type, path: issued_at }
+
+- name: a draft invoice needs no number
+  model: invoice
+  record:
+    direction: receivable
+    counterparty: { model: organization, $fixture: org-tessellate }
+    status: { category: draft }
+    issued_at: "2026-11-06"
+    currency: USD
+    tax_inclusive: false
+    lines:
+      - { description: "Onboarding, 20 hours", quantity: "20", unit: HUR, unit_price: { amount: "120.00", currency: USD }, amount: { amount: "2400.00", currency: USD } }
+    subtotal: { amount: "2400.00", currency: USD }
+    tax_total: { amount: "0.00", currency: USD }
+    total: { amount: "2400.00", currency: USD }
+    amount_paid: { amount: "0.00", currency: USD }
+    amount_due: { amount: "2400.00", currency: USD }
+  valid: true
+
+- name: a complete invoice with a service period is valid
+  model: invoice
+  record:
+    number: "INV-0103"
+    direction: receivable
+    counterparty: { model: organization, $fixture: org-bramblewood }
+    status: { category: open, state: "Sent" }
+    issued_at: "2026-11-06"
+    due_at: "2026-11-20"
+    terms: "Net 14"
+    currency: CAD
+    tax_inclusive: false
+    lines:
+      - product: { model: product, $fixture: prod-starter-plan }
+        description: "Starter plan, December, 4 seats"
+        quantity: "4"
+        unit: seat
+        unit_price: { amount: "12.25", currency: CAD }
+        tax_rate: { model: tax_rate, $fixture: tax-ca-gst }
+        tax_amount: { amount: "2.45", currency: CAD }
+        amount: { amount: "49.00", currency: CAD }
+        period: { start: "2026-12-01T00:00:00Z", end: "2027-01-01T00:00:00Z" }
+    subtotal: { amount: "49.00", currency: CAD }
+    tax_total: { amount: "2.45", currency: CAD }
+    total: { amount: "51.45", currency: CAD }
+    amount_paid: { amount: "0.00", currency: CAD }
+    amount_due: { amount: "51.45", currency: CAD }
+    reference: "PO-BW-2026-12"
+  valid: true
+
+- name: a note needs the records it is about
+  model: note
+  record: { body: "Looks good.", author: { model: member, $fixture: member-sam } }
+  valid: false
+  error: { code: required, path: about }
+
+- name: an event needs a period
+  model: event
+  record: { title: "Kickoff", status: { category: confirmed } }
+  valid: false
+  error: { code: required, path: period }
+
+- name: an attendee status outside the enum is rejected
+  model: event
+  record:
+    title: "Kickoff"
+    period: { start: "2026-10-14T10:00:00+01:00", end: "2026-10-14T11:00:00+01:00" }
+    status: { category: confirmed }
+    attendees: [ { ref: { model: person, $fixture: person-ada }, status: maybe } ]
+  valid: false
+  error: { code: invalid_enum, path: attendees.0.status }
+
+- name: a message with a sender and recipients is valid
+  model: message
+  record:
+    channel: email
+    direction: inbound
+    from: { ref: { model: person, $fixture: person-ada }, name: "Ada Okonkwo", address: "ada@lumenharbor.example" }
+    to: [ { address: "support@kelpline.example" } ]
+    subject: "Berth billing"
+    body: "Hello."
+    sent_at: "2026-11-06T08:00:00Z"
+  valid: true
+
+- name: a message needs a sender
+  model: message
+  record:
+    channel: email
+    direction: inbound
+    to: [ { address: "support@kelpline.example" } ]
+    body: "Hello."
+    sent_at: "2026-11-06T08:00:00Z"
+  valid: false
+  error: { code: required, path: from }
+
+- name: a chat message needs no recipients
+  model: message
+  record:
+    channel: chat
+    direction: internal
+    from: { ref: { model: member, $fixture: member-sam } }
+    body: "Lumen signed the MSA."
+    sent_at: "2026-10-12T15:58:00Z"
+  valid: true
+
+- name: a workspace slug is lowercase kebab-case
+  model: workspace
+  record: { slug: "Bad_Slug", name: "Bad", status: { category: active }, packs: [] }
+  valid: false
+  error: { code: pattern, path: slug }
+
+- name: a tag slug may carry a hierarchy and underscores
+  model: tag
+  record: { name: "VIP customers", slug: "customers/vip_customers", color: "#7C2D12" }
+  valid: true
+
+- name: a tag slug may not carry upper case or spaces
+  model: tag
+  record: { name: "VIP", slug: "Customers VIP" }
+  valid: false
+  error: { code: pattern, path: slug }
+
+- name: a tag colour is a hex triplet
+  model: tag
+  record: { name: "VIP", slug: "customers/vip", color: "red" }
+  valid: false
+  error: { code: pattern, path: color }
+
+- name: identity factors are the closed set of kinds
+  model: identity
+  record:
+    principal: { model: person, $fixture: person-rafael }
+    provider: builtin
+    subject: "01JC5QA2H7X4D9F1G6K3M8N2P5"
+    email_verified: true
+    factors: [ "sms_code" ]
+    status: { category: active }
+  valid: false
+  error: { code: invalid_enum, path: factors.0 }
+
+- name: a document needs at least one author
+  model: document
+  record:
+    collection: { model: collection, $fixture: coll-docs }
+    title: "Getting started"
+    slug: getting-started
+    status: { category: draft }
+  valid: false
+  error: { code: required, path: authors }
+
+- name: a document may be created as an empty draft
+  model: document
+  record:
+    collection: { model: collection, $fixture: coll-docs }
+    title: "Untitled"
+    slug: untitled
+    status: { category: draft }
+    authors: [ { model: member, $fixture: member-ingrid } ]
+  valid: true
+
+- name: a payment refund carries its kind
+  model: payment
+  record:
+    direction: receivable
+    kind: chargeback
+    counterparty: { model: organization, $fixture: org-periwinkle }
+    amount: { amount: "27.00", currency: USD }
+    paid_at: "2026-09-03T16:40:00Z"
+    status: { category: succeeded }
+  valid: false
+  error: { code: invalid_enum, path: kind }

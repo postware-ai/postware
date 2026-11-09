@@ -1,0 +1,9 @@
+# Default policies of the crm pack: none.
+#
+# Pipelines and Deals are the team's records. End users, guests and the public never read them unless
+# a workspace adds a policy or a Share. The file exists so every pack has one and the compiler emits
+# standard/dist/policies/crm.json.
+#
+# Source: docs/spec/04-policy-share.md section 4 (crm: no end-user policies).
+
+[]

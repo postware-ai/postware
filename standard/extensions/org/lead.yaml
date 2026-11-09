@@ -1,0 +1,10 @@
+# Published extension declarations for Teams: hierarchy and typing that only some tools have. URN
+# urn:postware:ext:org:<name>; stored at ext.org.<name>. parent and lead hold record ids as strings because
+# extension declarations carry no reference type.
+
+- model: team
+  namespace: org
+  name: lead
+  type: string
+  description: "The id of the Member who leads the team; the envelope's owner is the accountable operator of the record itself."
+  index: false

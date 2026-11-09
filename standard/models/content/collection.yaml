@@ -1,0 +1,18 @@
+urn: urn:postware:content:collection
+name: collection
+title: Collection
+version: 1
+group: content
+description: "A set of Documents published together: a site, a blog, a docs tree, a changelog or a help centre, with a slug and a public flag that publishes its published Documents."
+agent_context: |
+  Collection is the publication unit; public true makes every Document in it with status published, and a
+  published_at that has passed, readable without sign-in. Dedupe by slug. The one mistake: assuming drafts leak
+  when a Collection is public; only published Documents are served, but check its Documents before flipping it.
+identity:
+  - [slug]
+fields:
+  name:        { type: string, required: true }
+  slug:        { type: string, required: true, index: true, pattern: "^[a-z0-9]+(-[a-z0-9]+)*$" }
+  kind:        { type: enum, values: [site, blog, docs, changelog, help, other], default: other }
+  description: { type: text }
+  public:      { type: bool, required: true, default: false, description: "makes its published Documents publicly readable through the Content pack's public policy" }

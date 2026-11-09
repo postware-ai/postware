@@ -1,0 +1,9 @@
+# Published extension declarations of the support pack: ticket attributes that vendors disagree on or that are
+# not needed on day one. URN urn:postware:ext:support:<name>; stored at ext.support.<name>.
+
+- model: ticket
+  namespace: support
+  name: cc
+  type: object
+  description: "People copied on the whole ticket rather than on single messages: { participants: [ Participant ] }."
+  index: false

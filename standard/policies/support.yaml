@@ -1,0 +1,57 @@
+# Default policies of the support pack. See policies/core.yaml for the shape and the rules.
+#
+# An end user reads and creates the Tickets it requested, reads the Messages and the shared Notes
+# about those Tickets, and sends Messages about them. Internal Notes (visibility `internal`, the
+# default) stay with the team.
+#
+# "about any {model: ticket, where: ...}" is the Scope operand of docs/spec/04-policy-share.md
+# section 5: the reference list must contain a record matching the scope. Shares compile to the same
+# form.
+#
+# Source: docs/spec/04-policy-share.md section 4 (support).
+
+- name: end user reads and creates own tickets
+  principal: { kind: end_user }
+  applies_to: ticket
+  actions: [read, create]
+  where: { requester: "@principal.person" }
+  fields: null
+  enabled: true
+  origin: pack
+
+- name: end user reads messages about own tickets
+  principal: { kind: end_user }
+  applies_to: message
+  actions: [read]
+  where:
+    about:
+      any: { model: ticket, where: { requester: "@principal.person" } }
+  fields: null
+  enabled: true
+  origin: pack
+
+- name: end user reads shared notes about own tickets
+  principal: { kind: end_user }
+  applies_to: note
+  actions: [read]
+  where:
+    and:
+      - { visibility: shared }
+      - about:
+          any: { model: ticket, where: { requester: "@principal.person" } }
+  fields: null
+  enabled: true
+  origin: pack
+
+- name: end user sends messages about own tickets
+  principal: { kind: end_user }
+  applies_to: message
+  actions: [create]
+  where:
+    and:
+      - { "from.ref": "@principal.person" }
+      - about:
+          any: { model: ticket, where: { requester: "@principal.person" } }
+  fields: null
+  enabled: true
+  origin: pack

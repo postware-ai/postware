@@ -1,0 +1,22 @@
+urn: urn:postware:core:organization
+name: organization
+title: Organization
+version: 1
+group: core
+description: "A company, nonprofit, government body or household: a customer, a vendor, a partner or an account. The relationship to the workspace lives on Deals, Invoices, affiliations and tags, never on the Organization."
+agent_context: |
+  Use Organization for any company or institution. Dedupe by the domain identifier (identifiers [{system: domain,
+  value: ...}]); derive the domain from a website URL before creating, and add vat:*, duns or lei identifiers when
+  known. Firmographics (industry, employees, annual revenue) are ext.crm.*, the registered name for invoices is
+  ext.billing.legal_name, and the relationship (customer, partner, vendor) is a tag. The one mistake: a second
+  Organization for the same company under another spelling of its name.
+identity:
+  - [identifiers]
+fields:
+  name:        { type: string, required: true }
+  phones:      { type: ContactPoint, list: true }
+  urls:        { type: ContactPoint, list: true, description: "website first; social profiles after" }
+  addresses:   { type: Address, list: true, description: "kind billing, shipping, mailing, work or other" }
+  parent:      { type: ref, to: [organization] }
+  logo:        { type: ref, to: [file] }
+  description: { type: text }

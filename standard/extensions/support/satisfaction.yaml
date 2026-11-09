@@ -1,0 +1,9 @@
+# Published extension declarations of the support pack: ticket attributes that vendors disagree on or that are
+# not needed on day one. URN urn:postware:ext:support:<name>; stored at ext.support.<name>.
+
+- model: ticket
+  namespace: support
+  name: satisfaction
+  type: object
+  description: "The requester's rating after resolution: { rating (int, 1 to 5), comment }."
+  index: false

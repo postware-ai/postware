@@ -1,0 +1,80 @@
+[
+  {
+    "actions": [
+      "read",
+      "update"
+    ],
+    "applies_to": "person",
+    "enabled": true,
+    "fields": [
+      "name",
+      "emails",
+      "phones",
+      "urls",
+      "addresses",
+      "job_title",
+      "avatar",
+      "birthday",
+      "locale",
+      "timezone",
+      "description"
+    ],
+    "name": "end user reads and updates own person",
+    "origin": "pack",
+    "principal": {
+      "kind": "end_user"
+    },
+    "where": {
+      "id": "@principal.person"
+    }
+  },
+  {
+    "actions": [
+      "read"
+    ],
+    "applies_to": "note",
+    "enabled": true,
+    "fields": null,
+    "name": "end user reads own notes",
+    "origin": "pack",
+    "principal": {
+      "kind": "end_user"
+    },
+    "where": {
+      "author": "@principal.person"
+    }
+  },
+  {
+    "actions": [
+      "create"
+    ],
+    "applies_to": "note",
+    "enabled": true,
+    "fields": [
+      "body",
+      "author",
+      "about",
+      "visibility",
+      "attachments"
+    ],
+    "name": "end user comments on own person",
+    "origin": "pack",
+    "principal": {
+      "kind": "end_user"
+    },
+    "where": {
+      "and": [
+        {
+          "author": "@principal.person"
+        },
+        {
+          "about": {
+            "any": [
+              "@principal.person"
+            ]
+          }
+        }
+      ]
+    }
+  }
+]

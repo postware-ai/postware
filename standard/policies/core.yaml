@@ -1,0 +1,45 @@
+# Default policies of the core pack: installed into every workspace as Policy records (model
+# `policy`, origin `pack`), editable by admins, compiled to standard/dist/policies/core.json.
+#
+# Shape: the Policy model's fields. `where` is a query-grammar object (docs/spec/02-query.md) in
+# which the request substitutes the variables of docs/spec/04-policy-share.md section 2. Roles are
+# evaluated before policies, so these apply to end users (Persons holding an Identity), guests and
+# the public only; members and admins never consult them.
+#
+# Source: docs/spec/04-policy-share.md section 4 (core).
+
+- name: end user reads and updates own person
+  principal: { kind: end_user }
+  applies_to: person
+  actions: [read, update]
+  where: { id: "@principal.person" }
+  # every Person field except affiliations: an end user does not edit its own organization links.
+  # Keep in sync with models/core/person.yaml. Confidential fields (birthday) are still withheld on
+  # read by the sensitivity rule, whatever this list says.
+  fields: [name, emails, phones, urls, addresses, job_title, avatar, birthday, locale, timezone, description]
+  enabled: true
+  origin: pack
+
+- name: end user reads own notes
+  principal: { kind: end_user }
+  applies_to: note
+  actions: [read]
+  where: { author: "@principal.person" }
+  fields: null
+  enabled: true
+  origin: pack
+
+- name: end user comments on own person
+  # "creates Notes about records it can read": in the core pack the only such record is its own
+  # Person; packs that grant more reads add their own comment policies. The note must be authored by
+  # the principal, so a guest cannot write in someone else's name.
+  principal: { kind: end_user }
+  applies_to: note
+  actions: [create]
+  where:
+    and:
+      - { author: "@principal.person" }
+      - { about: { any: ["@principal.person"] } }
+  fields: [body, author, about, visibility, attachments]
+  enabled: true
+  origin: pack

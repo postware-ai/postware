@@ -1,0 +1,144 @@
+# Status vectors: `Status.category` is validated against the model's categories; `state` is the
+# workspace's or the source's own label and is never validated. Same semantics as validation.yaml.
+
+- name: a task cannot be in a category the standard does not know
+  model: task
+  record: { title: "Ship it", status: { category: flying } }
+  valid: false
+  error: { code: invalid_status_category, path: status.category }
+
+- name: a task in a standard category with the workspace's own label is accepted
+  model: task
+  record: { title: "Ship it", status: { category: in_progress, state: "Doing" } }
+  valid: true
+
+- name: blocked is a label on a task, not a category
+  model: task
+  record: { title: "Source dock tokens", status: { category: blocked } }
+  valid: false
+  error: { code: invalid_status_category, path: status.category }
+
+- name: a blocked task is in_progress with the label Blocked
+  model: task
+  record: { title: "Source dock tokens", status: { category: in_progress, state: "Blocked" } }
+  valid: true
+
+- name: a status needs its category even when a state label is given
+  model: project
+  record: { name: "Website relaunch", status: { state: "Kicking off" } }
+  valid: false
+  error: { code: required, path: status.category }
+
+- name: overdue is a query on invoices, not a category
+  model: invoice
+  record:
+    number: "INV-0104"
+    direction: receivable
+    counterparty: { model: person, $fixture: person-rafael }
+    status: { category: overdue }
+    issued_at: "2026-10-01"
+    due_at: "2026-10-15"
+    currency: USD
+    tax_inclusive: false
+    lines:
+      - { description: "Starter plan", quantity: "1", unit_price: { amount: "9.00", currency: USD }, amount: { amount: "9.00", currency: USD } }
+    subtotal: { amount: "9.00", currency: USD }
+    tax_total: { amount: "0.00", currency: USD }
+    total: { amount: "9.00", currency: USD }
+    amount_paid: { amount: "0.00", currency: USD }
+    amount_due: { amount: "9.00", currency: USD }
+  valid: false
+  error: { code: invalid_status_category, path: status.category }
+
+- name: a deal is won through the category, whatever the stage label
+  model: deal
+  record:
+    name: "Lumen Harbor: Pro plan"
+    pipeline: { model: pipeline, $fixture: pipe-sales }
+    stage: won
+    status: { category: won, state: "Closed won" }
+  valid: true
+
+- name: resolved is a ticket state label, not a category
+  model: ticket
+  record:
+    subject: "Cancel our subscription"
+    requester: { model: person, $fixture: person-mei }
+    status: { category: resolved }
+  valid: false
+  error: { code: invalid_status_category, path: status.category }
+
+- name: a solved ticket labelled Resolved is accepted
+  model: ticket
+  record:
+    subject: "Cancel our subscription"
+    requester: { model: person, $fixture: person-mei }
+    status: { category: solved, state: "Resolved" }
+    priority: low
+    channel: phone
+  valid: true
+
+- name: a document is published through the category
+  model: document
+  record:
+    collection: { model: collection, $fixture: coll-docs }
+    title: "Getting started"
+    slug: getting-started
+    body: "# Getting started"
+    status: { category: live }
+    authors: [ { model: member, $fixture: member-ingrid } ]
+  valid: false
+  error: { code: invalid_status_category, path: status.category }
+
+- name: a subscription in dunning is past_due with a label
+  model: subscription
+  record:
+    direction: receivable
+    counterparty: { model: person, $fixture: person-rafael }
+    items: [ { price: { model: price, $fixture: price-starter-monthly }, quantity: "1" } ]
+    status: { category: past_due, state: "Dunning" }
+    current_period: { start: "2026-10-20T00:00:00Z", end: "2026-11-20T00:00:00Z" }
+    started_at: "2026-04-20T18:45:00Z"
+  valid: true
+
+- name: ended is not a subscription category; cancelled with ended_at is
+  model: subscription
+  record:
+    direction: receivable
+    counterparty: { model: organization, $fixture: org-periwinkle }
+    items: [ { price: { model: price, $fixture: price-starter-monthly }, quantity: "3" } ]
+    status: { category: ended }
+  valid: false
+  error: { code: invalid_status_category, path: status.category }
+
+- name: a pending subscription has no current period yet
+  model: subscription
+  record:
+    direction: receivable
+    counterparty: { model: organization, $fixture: org-bramblewood }
+    items: [ { price: { model: price, $fixture: price-starter-monthly-cad }, quantity: "4" } ]
+    status: { category: pending, state: "Awaiting the co-op vote" }
+  valid: true
+
+- name: an event status is a Status with the iCalendar categories
+  model: event
+  record: { title: "Kickoff", period: { start: "2026-10-14T10:00:00+01:00" }, status: { category: postponed } }
+  valid: false
+  error: { code: invalid_status_category, path: status.category }
+
+- name: refunded is not a payment category; a refund is a Payment of kind refund
+  model: payment
+  record:
+    direction: receivable
+    kind: payment
+    counterparty: { model: organization, $fixture: org-periwinkle }
+    amount: { amount: "27.00", currency: USD }
+    paid_at: "2026-09-03T16:40:00Z"
+    status: { category: refunded }
+  valid: false
+  error: { code: invalid_status_category, path: status.category }
+
+- name: an invited member is a Status category
+  model: member
+  record: { kind: person, display_name: "Noor Haddad", roles: [member], status: { category: invited }, invitation: { email: "noor@kelpline.example" } }
+  valid: true

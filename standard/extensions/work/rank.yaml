@@ -1,0 +1,9 @@
+# Published extension declarations for Tasks: scheduling, effort and ordering attributes that differ per tool.
+# URN urn:postware:ext:work:<name>; stored at ext.work.<name>.
+
+- model: task
+  namespace: work
+  name: rank
+  type: string
+  description: "Manual ordering key within a view; lexicographic."
+  index: false

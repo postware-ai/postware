@@ -1,0 +1,292 @@
+{
+  "models": [
+    {
+      "name": "collection",
+      "title": "Collection",
+      "pack": "content",
+      "version": 1,
+      "urn": "urn:postware:content:collection",
+      "description": "A set of Documents published together: a site, a blog, a docs tree, a changelog or a help centre, with a slug and a public flag that publishes its published Documents."
+    },
+    {
+      "name": "deal",
+      "title": "Deal",
+      "pack": "crm",
+      "version": 1,
+      "urn": "urn:postware:crm:deal",
+      "description": "A potential sale to an Organization or a Person, tracked through a Pipeline, with an amount, a probability and an expected close."
+    },
+    {
+      "name": "document",
+      "title": "Document",
+      "pack": "content",
+      "version": 1,
+      "urn": "urn:postware:content:document",
+      "description": "One piece of content in a Collection: a page, a post, a docs article, a changelog entry or a help article, in Markdown, with a status from draft to published, authors, SEO metadata and an optional parent for hierarchies."
+    },
+    {
+      "name": "event",
+      "title": "Event",
+      "pack": "core",
+      "version": 1,
+      "urn": "urn:postware:core:event",
+      "description": "A scheduled block of time: a meeting, a call, an appointment, a reminder."
+    },
+    {
+      "name": "file",
+      "title": "File",
+      "pack": "core",
+      "version": 1,
+      "urn": "urn:postware:core:file",
+      "description": "Stored or referenced binary content with a name and a type."
+    },
+    {
+      "name": "identity",
+      "title": "Identity",
+      "pack": "system",
+      "version": 1,
+      "urn": "urn:postware:system:identity",
+      "description": "How a principal authenticates: a provider's stable subject bound to a Member (an operator) or a Person (an end user), with the asserted email and the kinds of factor used."
+    },
+    {
+      "name": "import_run",
+      "title": "Import run",
+      "pack": "system",
+      "version": 1,
+      "urn": "urn:postware:system:import_run",
+      "description": "One execution of an importer: which importer, in which mode, with what outcome and per-model counts."
+    },
+    {
+      "name": "invoice",
+      "title": "Invoice",
+      "pack": "billing",
+      "version": 1,
+      "urn": "urn:postware:billing:invoice",
+      "description": "A statement of money owed for goods or services: receivable when we issued it, payable when we received it (a bill)."
+    },
+    {
+      "name": "member",
+      "title": "Member",
+      "pack": "system",
+      "version": 1,
+      "urn": "urn:postware:system:member",
+      "description": "An operator of the workspace: a person on the team, an agent or a service, with roles."
+    },
+    {
+      "name": "message",
+      "title": "Message",
+      "pack": "core",
+      "version": 1,
+      "urn": "urn:postware:core:message",
+      "description": "One message on a channel: an email, a chat message, an SMS, a call record, with sender, recipients, body and the records it is about."
+    },
+    {
+      "name": "note",
+      "title": "Note",
+      "pack": "core",
+      "version": 1,
+      "urn": "urn:postware:core:note",
+      "description": "Free text about one or more records: an internal note, a comment, a meeting summary."
+    },
+    {
+      "name": "organization",
+      "title": "Organization",
+      "pack": "core",
+      "version": 1,
+      "urn": "urn:postware:core:organization",
+      "description": "A company, nonprofit, government body or household: a customer, a vendor, a partner or an account."
+    },
+    {
+      "name": "payment",
+      "title": "Payment",
+      "pack": "billing",
+      "version": 1,
+      "urn": "urn:postware:billing:payment",
+      "description": "Money that moved against invoices: a customer paying us (receivable), us paying a vendor (payable), or a refund of either."
+    },
+    {
+      "name": "person",
+      "title": "Person",
+      "pack": "core",
+      "version": 1,
+      "urn": "urn:postware:core:person",
+      "description": "A human being: a customer, a contact, an employee, or an end user of the product."
+    },
+    {
+      "name": "pipeline",
+      "title": "Pipeline",
+      "pack": "crm",
+      "version": 1,
+      "urn": "urn:postware:crm:pipeline",
+      "description": "An ordered set of stages that Deals move through, each mapped to one of the standard categories open, won or lost."
+    },
+    {
+      "name": "policy",
+      "title": "Policy",
+      "pack": "system",
+      "version": 1,
+      "urn": "urn:postware:system:policy",
+      "description": "A rule: which principals may do which actions on which model, narrowed by a filter in the query grammar."
+    },
+    {
+      "name": "price",
+      "title": "Price",
+      "pack": "billing",
+      "version": 1,
+      "urn": "urn:postware:billing:price",
+      "description": "An amount at which a Product is sold, once or on a recurring interval."
+    },
+    {
+      "name": "product",
+      "title": "Product",
+      "pack": "core",
+      "version": 1,
+      "urn": "urn:postware:core:product",
+      "description": "A thing the business sells or buys: a good, a service or a digital item."
+    },
+    {
+      "name": "project",
+      "title": "Project",
+      "pack": "core",
+      "version": 1,
+      "urn": "urn:postware:core:project",
+      "description": "A container of work with a lifecycle: planned, active, paused, done or cancelled."
+    },
+    {
+      "name": "share",
+      "title": "Share",
+      "pack": "system",
+      "version": 1,
+      "urn": "urn:postware:system:share",
+      "description": "A grant of read, and optionally comment, access to records, by ids or by filter, to someone outside the workspace: a link, an email, another workspace or the public."
+    },
+    {
+      "name": "subscription",
+      "title": "Subscription",
+      "pack": "billing",
+      "version": 1,
+      "urn": "urn:postware:billing:subscription",
+      "description": "A recurring agreement to bill (receivable) or be billed (payable) for Prices, period after period."
+    },
+    {
+      "name": "tag",
+      "title": "Tag",
+      "pack": "system",
+      "version": 1,
+      "urn": "urn:postware:system:tag",
+      "description": "A label that works the same on every record: a namespaced slug with a display name, a colour and a description."
+    },
+    {
+      "name": "task",
+      "title": "Task",
+      "pack": "core",
+      "version": 1,
+      "urn": "urn:postware:core:task",
+      "description": "A unit of work with a status, a priority, assignees and a due date."
+    },
+    {
+      "name": "tax_rate",
+      "title": "Tax rate",
+      "pack": "billing",
+      "version": 1,
+      "urn": "urn:postware:billing:tax_rate",
+      "description": "A named tax percentage applied to invoice lines (VAT 20%, GST 5%, a state sales tax), referenced by Products and Invoice lines."
+    },
+    {
+      "name": "team",
+      "title": "Team",
+      "pack": "core",
+      "version": 1,
+      "urn": "urn:postware:core:team",
+      "description": "A named group of Members that work is assigned to."
+    },
+    {
+      "name": "ticket",
+      "title": "Ticket",
+      "pack": "support",
+      "version": 1,
+      "urn": "urn:postware:support:ticket",
+      "description": "A request for help from a Person, owned by the team until it is solved."
+    },
+    {
+      "name": "workspace",
+      "title": "Workspace",
+      "pack": "system",
+      "version": 1,
+      "urn": "urn:postware:system:workspace",
+      "description": "The tenant: one company or one person, holding exactly one of these records, its first."
+    }
+  ],
+  "packs": [
+    {
+      "name": "core",
+      "label": "Core",
+      "description": "The everyday records of a company: people, organizations, teams, projects, tasks, events, notes, messages, files and products. Included in every workspace.",
+      "models": [
+        "event",
+        "file",
+        "message",
+        "note",
+        "organization",
+        "person",
+        "product",
+        "project",
+        "task",
+        "team"
+      ]
+    },
+    {
+      "name": "system",
+      "label": "System",
+      "description": "The accounts, permissions, sharing and labels every workspace has. Included in every workspace.",
+      "models": [
+        "identity",
+        "import_run",
+        "member",
+        "policy",
+        "share",
+        "tag",
+        "workspace"
+      ]
+    },
+    {
+      "name": "crm",
+      "label": "CRM",
+      "description": "Sales pipelines and the deals moving through them.",
+      "models": [
+        "deal",
+        "pipeline"
+      ]
+    },
+    {
+      "name": "billing",
+      "label": "Billing",
+      "description": "Prices, subscriptions, invoices, payments and tax rates.",
+      "models": [
+        "invoice",
+        "payment",
+        "price",
+        "subscription",
+        "tax_rate"
+      ]
+    },
+    {
+      "name": "support",
+      "label": "Support",
+      "description": "Support tickets; the conversation is Messages about the ticket and internal notes are Notes.",
+      "models": [
+        "ticket"
+      ]
+    },
+    {
+      "name": "content",
+      "label": "Content",
+      "description": "Collections and Documents for a site, docs, a blog, a changelog or a help centre.",
+      "models": [
+        "collection",
+        "document"
+      ]
+    }
+  ],
+  "version": "0.1.0"
+}

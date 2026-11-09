@@ -1,0 +1,10 @@
+# Published extension declarations of the billing pack: attributes that only some billing or accounting systems
+# carry, or that need a usage, tax or e-invoicing profile to mean anything. URN urn:postware:ext:billing:<name>;
+# stored at ext.billing.<name>.
+
+- model: price
+  namespace: billing
+  name: tiers
+  type: object
+  description: "Tiered or volume pricing: { scheme (graduated | volume), tiers: [ { up_to (decimal string or null for the last tier), unit_amount { amount, currency }, flat_amount { amount, currency } } ] }."
+  index: false

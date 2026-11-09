@@ -1,0 +1,9 @@
+# Published extension declarations for Messages imported from mail systems. URN urn:postware:ext:messaging:<name>;
+# stored at ext.messaging.<name>.
+
+- model: message
+  namespace: messaging
+  name: received_at
+  type: datetime
+  description: "When the receiving system accepted the message (the Received trace, Gmail internalDate, Graph receivedDateTime); sent_at orders the thread, this records delivery."
+  index: false

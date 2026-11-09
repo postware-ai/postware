@@ -1,0 +1,468 @@
+# Policy vectors for the pack defaults (standard/policies/<pack>.yaml). The fixtures of core and system and of
+# the named pack are loaded; the default policies of core and of that pack are installed; nothing else.
+# `allowed: false` means 403 for writes and, for reads, 404 on get and an empty list on query. `@now` is the
+# time of the request, after every fixture's past dates and before 2027. Format: conformance/README.md.
+
+# ---------------------------------------------------------------- core
+- name: end user reads own person
+  pack: core
+  principal: { kind: end_user, person: { $fixture: person-ada } }
+  action: read
+  model: person
+  record: { $fixture: person-ada }
+  allowed: true
+
+- name: end user does not read another person
+  pack: core
+  principal: { kind: end_user, person: { $fixture: person-ada } }
+  action: read
+  model: person
+  record: { $fixture: person-tomasz }
+  allowed: false
+
+- name: end user updates own job title and locale
+  pack: core
+  principal: { kind: end_user, person: { $fixture: person-ada } }
+  action: update
+  model: person
+  record: { $fixture: person-ada }
+  patch: { job_title: "Director of Operations", locale: "en-GB" }
+  allowed: true
+
+- name: end user does not update own affiliations
+  pack: core
+  principal: { kind: end_user, person: { $fixture: person-ada } }
+  action: update
+  model: person
+  record: { $fixture: person-ada }
+  patch: { affiliations: [] }
+  allowed: false
+
+- name: end user does not update another person
+  pack: core
+  principal: { kind: end_user, person: { $fixture: person-ada } }
+  action: update
+  model: person
+  record: { $fixture: person-tomasz }
+  patch: { locale: "en-GB" }
+  allowed: false
+
+- name: end user does not delete own person
+  pack: core
+  principal: { kind: end_user, person: { $fixture: person-ada } }
+  action: delete
+  model: person
+  record: { $fixture: person-ada }
+  allowed: false
+
+- name: end user reads its own comment
+  pack: core
+  principal: { kind: end_user, person: { $fixture: person-rafael } }
+  action: read
+  model: note
+  record: { $fixture: note-rafael-comment }
+  allowed: true
+
+- name: end user does not read the team's internal notes
+  pack: core
+  principal: { kind: end_user, person: { $fixture: person-rafael } }
+  action: read
+  model: note
+  record: { $fixture: note-lumen-kickoff-summary }
+  allowed: false
+
+- name: end user comments on its own person
+  pack: core
+  principal: { kind: end_user, person: { $fixture: person-rafael } }
+  action: create
+  model: note
+  record:
+    body: "Please use my work address for invoices."
+    author: { model: person, $fixture: person-rafael }
+    about: [ { model: person, $fixture: person-rafael } ]
+    visibility: shared
+  allowed: true
+
+- name: end user does not comment on another person
+  pack: core
+  principal: { kind: end_user, person: { $fixture: person-rafael } }
+  action: create
+  model: note
+  record:
+    body: "Hello Ada."
+    author: { model: person, $fixture: person-rafael }
+    about: [ { model: person, $fixture: person-ada } ]
+  allowed: false
+
+- name: end user does not write a note in someone else's name
+  pack: core
+  principal: { kind: end_user, person: { $fixture: person-rafael } }
+  action: create
+  model: note
+  record:
+    body: "Signed, Ada."
+    author: { model: person, $fixture: person-ada }
+    about: [ { model: person, $fixture: person-rafael } ]
+  allowed: false
+
+- name: the public reads no person
+  pack: core
+  principal: { kind: public }
+  action: read
+  model: person
+  record: { $fixture: person-ada }
+  allowed: false
+
+- name: a member reads any person by role
+  pack: core
+  principal: { kind: member, roles: [member] }
+  action: read
+  model: person
+  record: { $fixture: person-ada }
+  allowed: true
+
+- name: end user does not read policies
+  pack: core
+  principal: { kind: end_user, person: { $fixture: person-ada } }
+  action: read
+  model: policy
+  record: { $fixture: policy-support-role }
+  allowed: false
+
+- name: a member reads policies, an admin-only model that members may read
+  pack: core
+  principal: { kind: member, roles: [member] }
+  action: read
+  model: policy
+  record: { $fixture: policy-support-role }
+  allowed: true
+
+# ---------------------------------------------------------------- billing
+- name: end user reads an invoice billed to its organization
+  pack: billing
+  principal: { kind: end_user, person: { $fixture: person-ada } }
+  action: read
+  model: invoice
+  record: { $fixture: inv-0007 }
+  allowed: true
+
+- name: end user reads an invoice billed to itself
+  pack: billing
+  principal: { kind: end_user, person: { $fixture: person-rafael } }
+  action: read
+  model: invoice
+  record: { $fixture: inv-0009 }
+  allowed: true
+
+- name: end user does not read another customer's invoice
+  pack: billing
+  principal: { kind: end_user, person: { $fixture: person-rafael } }
+  action: read
+  model: invoice
+  record: { $fixture: inv-0007 }
+  allowed: false
+
+- name: end user does not read an invoice of an organization it is not affiliated with
+  pack: billing
+  principal: { kind: end_user, person: { $fixture: person-ada } }
+  action: read
+  model: invoice
+  record: { $fixture: inv-tessellate-draft }
+  allowed: false
+
+- name: end user reads its organization's subscription
+  pack: billing
+  principal: { kind: end_user, person: { $fixture: person-ada } }
+  action: read
+  model: subscription
+  record: { $fixture: sub-lumen-pro }
+  allowed: true
+
+- name: end user does not read another organization's subscription
+  pack: billing
+  principal: { kind: end_user, person: { $fixture: person-ada } }
+  action: read
+  model: subscription
+  record: { $fixture: sub-tessellate-trial }
+  allowed: false
+
+- name: end user reads its organization's payment
+  pack: billing
+  principal: { kind: end_user, person: { $fixture: person-ada } }
+  action: read
+  model: payment
+  record: { $fixture: pay-lumen-card }
+  allowed: true
+
+- name: end user reads a refund made to its organization
+  pack: billing
+  principal: { kind: end_user, person: { $fixture: person-mei } }
+  action: read
+  model: payment
+  record: { $fixture: pay-periwinkle-refund }
+  allowed: true
+
+- name: end user does not read another customer's payment
+  pack: billing
+  principal: { kind: end_user, person: { $fixture: person-rafael } }
+  action: read
+  model: payment
+  record: { $fixture: pay-lumen-card }
+  allowed: false
+
+- name: end user does not update its own invoice
+  pack: billing
+  principal: { kind: end_user, person: { $fixture: person-rafael } }
+  action: update
+  model: invoice
+  record: { $fixture: inv-0009 }
+  patch: { status: { category: paid } }
+  allowed: false
+
+- name: end user does not read a vendor bill
+  pack: billing
+  principal: { kind: end_user, person: { $fixture: person-ada } }
+  action: read
+  model: invoice
+  record: { $fixture: bill-qc-2026-11 }
+  allowed: false
+
+# ---------------------------------------------------------------- support
+- name: end user reads its own ticket
+  pack: support
+  principal: { kind: end_user, person: { $fixture: person-rafael } }
+  action: read
+  model: ticket
+  record: { $fixture: ticket-rafael-login }
+  allowed: true
+
+- name: end user does not read another requester's ticket
+  pack: support
+  principal: { kind: end_user, person: { $fixture: person-ada } }
+  action: read
+  model: ticket
+  record: { $fixture: ticket-rafael-login }
+  allowed: false
+
+- name: end user creates a ticket as its own requester
+  pack: support
+  principal: { kind: end_user, person: { $fixture: person-rafael } }
+  action: create
+  model: ticket
+  record:
+    subject: "Invoice shows the wrong period"
+    description: "INV-0009 says 20 October to 20 November but I signed up on the 21st."
+    requester: { model: person, $fixture: person-rafael }
+    status: { category: new }
+    channel: web
+  allowed: true
+
+- name: end user does not create a ticket for someone else
+  pack: support
+  principal: { kind: end_user, person: { $fixture: person-rafael } }
+  action: create
+  model: ticket
+  record:
+    subject: "On behalf of Ada"
+    requester: { model: person, $fixture: person-ada }
+    status: { category: new }
+    channel: web
+  allowed: false
+
+- name: end user does not update its own ticket
+  pack: support
+  principal: { kind: end_user, person: { $fixture: person-rafael } }
+  action: update
+  model: ticket
+  record: { $fixture: ticket-rafael-login }
+  patch: { priority: urgent }
+  allowed: false
+
+- name: end user reads a message about its own ticket
+  pack: support
+  principal: { kind: end_user, person: { $fixture: person-rafael } }
+  action: read
+  model: message
+  record: { $fixture: msg-rafael-ticket-2 }
+  allowed: true
+
+- name: end user does not read a message about another ticket
+  pack: support
+  principal: { kind: end_user, person: { $fixture: person-ada } }
+  action: read
+  model: message
+  record: { $fixture: msg-rafael-ticket-1 }
+  allowed: false
+
+- name: end user reads a shared note about its own ticket
+  pack: support
+  principal: { kind: end_user, person: { $fixture: person-rafael } }
+  action: read
+  model: note
+  record: { $fixture: note-rafael-ticket-shared }
+  allowed: true
+
+- name: end user does not read an internal note about its own ticket
+  pack: support
+  principal: { kind: end_user, person: { $fixture: person-rafael } }
+  action: read
+  model: note
+  record: { $fixture: note-rafael-ticket-internal }
+  allowed: false
+
+- name: end user sends a message about its own ticket
+  pack: support
+  principal: { kind: end_user, person: { $fixture: person-rafael } }
+  action: create
+  model: message
+  record:
+    channel: web
+    direction: inbound
+    from: { ref: { model: person, $fixture: person-rafael }, name: "Rafael Nwosu" }
+    to: [ { address: "support@kelpline.example" } ]
+    body: "The new link worked, thank you."
+    sent_at: "2026-11-04T10:02:00Z"
+    about: [ { model: ticket, $fixture: ticket-rafael-login } ]
+  allowed: true
+
+- name: end user does not send a message about another ticket
+  pack: support
+  principal: { kind: end_user, person: { $fixture: person-rafael } }
+  action: create
+  model: message
+  record:
+    channel: web
+    direction: inbound
+    from: { ref: { model: person, $fixture: person-rafael } }
+    to: [ { address: "support@kelpline.example" } ]
+    body: "About Ada's berths."
+    sent_at: "2026-11-04T10:02:00Z"
+    about: [ { model: ticket, $fixture: ticket-ada-berths } ]
+  allowed: false
+
+- name: end user does not send a message in someone else's name
+  pack: support
+  principal: { kind: end_user, person: { $fixture: person-rafael } }
+  action: create
+  model: message
+  record:
+    channel: web
+    direction: inbound
+    from: { ref: { model: person, $fixture: person-ada } }
+    to: [ { address: "support@kelpline.example" } ]
+    body: "Signed, Ada."
+    sent_at: "2026-11-04T10:02:00Z"
+    about: [ { model: ticket, $fixture: ticket-rafael-login } ]
+  allowed: false
+
+# ---------------------------------------------------------------- content
+- name: the public reads a published document in a public collection
+  pack: content
+  principal: { kind: public }
+  action: read
+  model: document
+  record: { $fixture: doc-getting-started }
+  allowed: true
+
+- name: the public reads a published translation in a public collection
+  pack: content
+  principal: { kind: public }
+  action: read
+  model: document
+  record: { $fixture: doc-getting-started-de }
+  allowed: true
+
+- name: the public does not read a draft in a public collection
+  pack: content
+  principal: { kind: public }
+  action: read
+  model: document
+  record: { $fixture: doc-api-reference }
+  allowed: false
+
+- name: the public does not read a document in review
+  pack: content
+  principal: { kind: public }
+  action: read
+  model: document
+  record: { $fixture: doc-changelog-2026-11 }
+  allowed: false
+
+- name: the public does not read an archived document
+  pack: content
+  principal: { kind: public }
+  action: read
+  model: document
+  record: { $fixture: doc-pricing-2025 }
+  allowed: false
+
+- name: the public does not read a scheduled document before its published_at
+  pack: content
+  principal: { kind: public }
+  action: read
+  model: document
+  record: { $fixture: doc-pricing-2027-scheduled }
+  allowed: false
+
+- name: the public does not read a published document in a private collection
+  pack: content
+  principal: { kind: public }
+  action: read
+  model: document
+  record: { $fixture: doc-handbook-oncall }
+  allowed: false
+
+- name: the public reads a public collection
+  pack: content
+  principal: { kind: public }
+  action: read
+  model: collection
+  record: { $fixture: coll-docs }
+  allowed: true
+
+- name: the public does not read a private collection
+  pack: content
+  principal: { kind: public }
+  action: read
+  model: collection
+  record: { $fixture: coll-handbook }
+  allowed: false
+
+- name: the public creates nothing
+  pack: content
+  principal: { kind: public }
+  action: create
+  model: document
+  record:
+    collection: { model: collection, $fixture: coll-docs }
+    title: "Spam"
+    slug: spam
+    body: "Buy now."
+    status: { category: published }
+    authors: [ { model: member, $fixture: member-ingrid } ]
+  allowed: false
+
+# ---------------------------------------------------------------- crm
+- name: end user reads no deals
+  pack: crm
+  principal: { kind: end_user, person: { $fixture: person-ada } }
+  action: read
+  model: deal
+  record: { $fixture: deal-lumen-pro }
+  allowed: false
+
+- name: the public reads no pipelines
+  pack: crm
+  principal: { kind: public }
+  action: read
+  model: pipeline
+  record: { $fixture: pipe-sales }
+  allowed: false
+
+- name: a member reads deals by role
+  pack: crm
+  principal: { kind: member, roles: [member] }
+  action: read
+  model: deal
+  record: { $fixture: deal-lumen-pro }
+  allowed: true

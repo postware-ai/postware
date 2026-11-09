@@ -1,0 +1,258 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:postware:system:member",
+  "title": "Member",
+  "description": "An operator of the workspace: a person on the team, an agent or a service, with roles. Authorization, audit and the owner and assignee fields point at Members.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "ULID; generated when absent"
+    },
+    "model": {
+      "type": "string",
+      "description": "name@version",
+      "readOnly": true
+    },
+    "workspace": {
+      "type": "string",
+      "description": "the Workspace record id",
+      "readOnly": true
+    },
+    "revision": {
+      "type": "integer",
+      "description": "optimistic concurrency with If-Match",
+      "readOnly": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "created_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind: member|person|share|system, id}",
+      "readOnly": true
+    },
+    "updated_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind, id}",
+      "readOnly": true
+    },
+    "owner": {
+      "type": "string",
+      "description": "Member id, the accountable operator"
+    },
+    "identifiers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "description": "Identifier[]: the crosswalk"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^([a-z0-9][a-z0-9_-]{0,63}:)?[a-z0-9][a-z0-9_-]{0,63}(/[a-z0-9][a-z0-9_-]{0,63})*$"
+      },
+      "description": "tag slugs, `namespace:slug` form"
+    },
+    "ext": {
+      "type": "object",
+      "description": "declared extensions only"
+    },
+    "source": {
+      "type": "object",
+      "description": "{system, external_id, created_at, updated_at, deleted_at?, import_run, imported_at, payload}"
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "soft delete",
+      "readOnly": true
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "person",
+        "agent",
+        "service"
+      ]
+    },
+    "display_name": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "person": {
+      "$ref": "#/$defs/Ref",
+      "x-to": [
+        "person"
+      ],
+      "description": "the operator's own Person record"
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 4000
+      },
+      "description": "owner, admin, member, or a custom role name that policies grant"
+    },
+    "status": {
+      "$ref": "#/$defs/Status",
+      "x-categories": [
+        "invited",
+        "active",
+        "suspended"
+      ],
+      "default": {
+        "category": "active"
+      }
+    },
+    "invitation": {
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "invited_by": {
+          "$ref": "#/$defs/Ref",
+          "x-to": [
+            "member"
+          ]
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "email"
+      ],
+      "additionalProperties": false,
+      "description": "set while status is invited; the magic link sent to this email activates the Member"
+    }
+  },
+  "required": [
+    "id",
+    "model",
+    "workspace",
+    "revision",
+    "created_at",
+    "updated_at",
+    "created_by",
+    "updated_by",
+    "kind",
+    "display_name",
+    "roles",
+    "status"
+  ],
+  "additionalProperties": false,
+  "x-model": {
+    "name": "member",
+    "version": 1,
+    "group": "system",
+    "identity": [
+      [
+        "person"
+      ],
+      [
+        "invitation.email"
+      ]
+    ],
+    "status_categories": [
+      "invited",
+      "active",
+      "suspended"
+    ],
+    "sensitivity": {},
+    "events": null,
+    "agent_context": "Member is who operates the workspace, including you: an agent runs as the Member its API key was created for.\nEnd users of the product are never Members; they are Persons with an Identity, and a guest is a Person with a\nShare, not a role. Dedupe by person, or by the invitation email while invited. The one mistake: creating a\nMember to represent a customer or a contact; create a Person instead."
+  },
+  "$defs": {
+    "Ref": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "Principal": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "member",
+            "person",
+            "share",
+            "system"
+          ]
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "Identifier": {
+      "type": "object",
+      "properties": {
+        "system": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "primary": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "system",
+        "value"
+      ],
+      "additionalProperties": false,
+      "description": "An external or natural key. `system` is a registered scheme (email, domain, vat:eu, sha256, stripe:customer, postware:workspace)."
+    },
+    "Status": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "state": {
+          "type": "string",
+          "maxLength": 4000
+        }
+      },
+      "required": [
+        "category"
+      ],
+      "additionalProperties": false,
+      "description": "category is the standard (validated per model); state is the workspace's own label."
+    }
+  }
+}

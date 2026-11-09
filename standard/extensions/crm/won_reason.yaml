@@ -1,0 +1,10 @@
+# Published extension declarations of the CRM pack. URN urn:postware:ext:crm:<name>; stored at ext.crm.<name>
+# and filtered with { "ext.crm.<name>": ... }. Shape: ExtensionDecl (docs/spec/09-go-contracts.md), one entry per
+# model the extension applies to.
+
+- model: deal
+  namespace: crm
+  name: won_reason
+  type: string
+  description: "Why the deal was won, in the team's own words or vocabulary."
+  index: false

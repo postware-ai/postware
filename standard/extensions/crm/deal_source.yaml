@@ -1,0 +1,10 @@
+# Published extension declarations of the CRM pack. URN urn:postware:ext:crm:<name>; stored at ext.crm.<name>
+# and filtered with { "ext.crm.<name>": ... }. Shape: ExtensionDecl (docs/spec/09-go-contracts.md), one entry per
+# model the extension applies to.
+
+- model: deal
+  namespace: crm
+  name: deal_source
+  type: string
+  description: "Where this deal came from: the channel, campaign or referral that produced the opportunity. Named deal_source because the envelope's source object holds import provenance."
+  index: false

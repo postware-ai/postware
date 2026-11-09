@@ -1,0 +1,200 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:postware:content:collection",
+  "title": "Collection",
+  "description": "A set of Documents published together: a site, a blog, a docs tree, a changelog or a help centre, with a slug and a public flag that publishes its published Documents.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "ULID; generated when absent"
+    },
+    "model": {
+      "type": "string",
+      "description": "name@version",
+      "readOnly": true
+    },
+    "workspace": {
+      "type": "string",
+      "description": "the Workspace record id",
+      "readOnly": true
+    },
+    "revision": {
+      "type": "integer",
+      "description": "optimistic concurrency with If-Match",
+      "readOnly": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "created_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind: member|person|share|system, id}",
+      "readOnly": true
+    },
+    "updated_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind, id}",
+      "readOnly": true
+    },
+    "owner": {
+      "type": "string",
+      "description": "Member id, the accountable operator"
+    },
+    "identifiers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "description": "Identifier[]: the crosswalk"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^([a-z0-9][a-z0-9_-]{0,63}:)?[a-z0-9][a-z0-9_-]{0,63}(/[a-z0-9][a-z0-9_-]{0,63})*$"
+      },
+      "description": "tag slugs, `namespace:slug` form"
+    },
+    "ext": {
+      "type": "object",
+      "description": "declared extensions only"
+    },
+    "source": {
+      "type": "object",
+      "description": "{system, external_id, created_at, updated_at, deleted_at?, import_run, imported_at, payload}"
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "soft delete",
+      "readOnly": true
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "slug": {
+      "type": "string",
+      "maxLength": 4000,
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "site",
+        "blog",
+        "docs",
+        "changelog",
+        "help",
+        "other"
+      ],
+      "default": "other"
+    },
+    "description": {
+      "type": "string",
+      "contentMediaType": "text/markdown"
+    },
+    "public": {
+      "type": "boolean",
+      "description": "makes its published Documents publicly readable through the Content pack's public policy",
+      "default": false
+    }
+  },
+  "required": [
+    "id",
+    "model",
+    "workspace",
+    "revision",
+    "created_at",
+    "updated_at",
+    "created_by",
+    "updated_by",
+    "name",
+    "slug",
+    "public"
+  ],
+  "additionalProperties": false,
+  "x-model": {
+    "name": "collection",
+    "version": 1,
+    "group": "content",
+    "identity": [
+      [
+        "slug"
+      ]
+    ],
+    "status_categories": [],
+    "sensitivity": {},
+    "events": null,
+    "agent_context": "Collection is the publication unit; public true makes every Document in it with status published, and a\npublished_at that has passed, readable without sign-in. Dedupe by slug. The one mistake: assuming drafts leak\nwhen a Collection is public; only published Documents are served, but check its Documents before flipping it."
+  },
+  "$defs": {
+    "Ref": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "Principal": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "member",
+            "person",
+            "share",
+            "system"
+          ]
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "Identifier": {
+      "type": "object",
+      "properties": {
+        "system": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "primary": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "system",
+        "value"
+      ],
+      "additionalProperties": false,
+      "description": "An external or natural key. `system` is a registered scheme (email, domain, vat:eu, sha256, stripe:customer, postware:workspace)."
+    }
+  }
+}

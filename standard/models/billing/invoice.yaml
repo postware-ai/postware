@@ -1,0 +1,59 @@
+urn: urn:postware:billing:invoice
+name: invoice
+title: Invoice
+version: 1
+group: billing
+description: "A statement of money owed for goods or services: receivable when we issued it, payable when we received it (a bill). Lines with amounts and taxes, totals, a status from draft to paid, and the payments applied to it."
+agent_context: |
+  Create with status draft; number may be empty until the invoice leaves draft, then it is required and unique per
+  workspace for receivable invoices and per counterparty for payable ones. subtotal is the sum of lines.amount,
+  total is subtotal minus discount_total plus tax_total (tax_total excluded when tax_inclusive), amount_due is
+  total minus amount_paid (zero on a void invoice); overdue and partially paid are queries, not statuses. The one mistake: status paid
+  without a Payment; create the Payment, apply it, then set paid and paid_at, which emits invoice.paid.
+identity:
+  - [identifiers]
+  - [direction, counterparty, number]
+status:
+  categories: [draft, open, paid, void, uncollectible]
+fields:
+  number:         { type: string, index: true, description: "required once status is not draft; unique per workspace when receivable, per counterparty when payable" }
+  direction:      { type: enum, values: [receivable, payable], required: true, default: receivable, description: a bill is a payable Invoice }
+  counterparty:   { type: ref, to: [organization, person], required: true }
+  bill_to:        { type: Address, description: "the billing address as printed; defaults from the counterparty" }
+  status:         { type: Status, required: true, default: { category: draft } }
+  issued_at:      { type: date, required: true }
+  due_at:         { type: date, index: true, description: due_at or terms is given when amount_due is above zero }
+  terms:          { type: string, description: "payment terms as text, e.g. Net 30" }
+  currency:       { type: string, required: true, pattern: "^[A-Z]{3}$", description: "ISO 4217; every Money on the invoice uses it" }
+  tax_inclusive:  { type: bool, required: true, default: false }
+  lines:
+    type: object
+    list: true
+    required: true
+    fields:
+      product:     { type: ref, to: [product] }
+      price:       { type: ref, to: [price] }
+      description: { type: string, required: true }
+      quantity:    { type: decimal, required: true, default: "1" }
+      unit:        { type: string, description: "unit of measure; a UN/ECE Rec 20 code or a word" }
+      unit_price:  { type: Money, required: true }
+      discount:    { type: Money, description: line-level discount already deducted from amount }
+      tax_rate:    { type: ref, to: [tax_rate] }
+      tax_amount:  { type: Money }
+      amount:      { type: Money, required: true, description: "quantity times unit_price minus discount; includes tax only when tax_inclusive" }
+      period:      { type: Period, description: the service period the line covers }
+  subtotal:       { type: Money, required: true, description: the sum of lines.amount }
+  discount_total: { type: Money, description: document-level discount }
+  tax_total:      { type: Money, required: true }
+  total:          { type: Money, required: true }
+  amount_paid:    { type: Money, required: true, description: maintained from applied Payments }
+  amount_due:     { type: Money, required: true, description: total minus amount_paid }
+  paid_at:        { type: datetime }
+  reference:      { type: string, description: the buyer's PO or reference }
+  memo:           { type: text, description: a customer-facing note printed on the invoice }
+  subscription:   { type: ref, to: [subscription] }
+  about:          { type: ref, to: any, list: true, description: "the Deal, the Project" }
+events:
+  - { field: status.category, to: paid, name: invoice.paid }
+  - { field: status.category, to: void, name: invoice.voided }
+  - { field: status.category, to: uncollectible, name: invoice.uncollectible }

@@ -1,0 +1,237 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:postware:system:import_run",
+  "title": "Import run",
+  "description": "One execution of an importer: which importer, in which mode, with what outcome and per-model counts. Every record it wrote carries its id in source.import_run.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "ULID; generated when absent"
+    },
+    "model": {
+      "type": "string",
+      "description": "name@version",
+      "readOnly": true
+    },
+    "workspace": {
+      "type": "string",
+      "description": "the Workspace record id",
+      "readOnly": true
+    },
+    "revision": {
+      "type": "integer",
+      "description": "optimistic concurrency with If-Match",
+      "readOnly": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "created_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind: member|person|share|system, id}",
+      "readOnly": true
+    },
+    "updated_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind, id}",
+      "readOnly": true
+    },
+    "owner": {
+      "type": "string",
+      "description": "Member id, the accountable operator"
+    },
+    "identifiers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "description": "Identifier[]: the crosswalk"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^([a-z0-9][a-z0-9_-]{0,63}:)?[a-z0-9][a-z0-9_-]{0,63}(/[a-z0-9][a-z0-9_-]{0,63})*$"
+      },
+      "description": "tag slugs, `namespace:slug` form"
+    },
+    "ext": {
+      "type": "object",
+      "description": "declared extensions only"
+    },
+    "source": {
+      "type": "object",
+      "description": "{system, external_id, created_at, updated_at, deleted_at?, import_run, imported_at, payload}"
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "soft delete",
+      "readOnly": true
+    },
+    "importer": {
+      "type": "string",
+      "maxLength": 4000,
+      "description": "csv, stripe, supabase, ..."
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "once",
+        "continuous"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "running",
+        "succeeded",
+        "failed",
+        "partial"
+      ]
+    },
+    "dry_run": {
+      "type": "boolean",
+      "default": false
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "finished_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "per model: {created, updated, skipped, errors}"
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "row": {
+            "type": "integer",
+            "description": "the source row, 1-based, header excluded"
+          },
+          "path": {
+            "type": "string",
+            "maxLength": 4000,
+            "description": "the field path that failed"
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 4000
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "id",
+    "model",
+    "workspace",
+    "revision",
+    "created_at",
+    "updated_at",
+    "created_by",
+    "updated_by",
+    "importer",
+    "mode",
+    "status",
+    "dry_run",
+    "started_at",
+    "counts"
+  ],
+  "additionalProperties": false,
+  "x-model": {
+    "name": "import_run",
+    "version": 1,
+    "group": "system",
+    "identity": [],
+    "status_categories": [],
+    "sensitivity": {},
+    "events": null,
+    "agent_context": "An ImportRun is created by import_run or `a import`, never by hand; read it for the counts and the errors, and\nalways run with dry_run first. Find what a run wrote by querying source.import_run. The one mistake: retrying a\npartial run without reading its errors; the rows that succeeded are already upserted and simply update again."
+  },
+  "$defs": {
+    "Ref": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "Principal": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "member",
+            "person",
+            "share",
+            "system"
+          ]
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "Identifier": {
+      "type": "object",
+      "properties": {
+        "system": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "primary": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "system",
+        "value"
+      ],
+      "additionalProperties": false,
+      "description": "An external or natural key. `system` is a registered scheme (email, domain, vat:eu, sha256, stripe:customer, postware:workspace)."
+    }
+  }
+}

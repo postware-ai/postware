@@ -1,0 +1,245 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:postware:system:policy",
+  "title": "Policy",
+  "description": "A rule: which principals may do which actions on which model, narrowed by a filter in the query grammar. Packs ship defaults, admins edit them, Shares compile into them.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "ULID; generated when absent"
+    },
+    "model": {
+      "type": "string",
+      "description": "name@version",
+      "readOnly": true
+    },
+    "workspace": {
+      "type": "string",
+      "description": "the Workspace record id",
+      "readOnly": true
+    },
+    "revision": {
+      "type": "integer",
+      "description": "optimistic concurrency with If-Match",
+      "readOnly": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "created_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind: member|person|share|system, id}",
+      "readOnly": true
+    },
+    "updated_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind, id}",
+      "readOnly": true
+    },
+    "owner": {
+      "type": "string",
+      "description": "Member id, the accountable operator"
+    },
+    "identifiers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "description": "Identifier[]: the crosswalk"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^([a-z0-9][a-z0-9_-]{0,63}:)?[a-z0-9][a-z0-9_-]{0,63}(/[a-z0-9][a-z0-9_-]{0,63})*$"
+      },
+      "description": "tag slugs, `namespace:slug` form"
+    },
+    "ext": {
+      "type": "object",
+      "description": "declared extensions only"
+    },
+    "source": {
+      "type": "object",
+      "description": "{system, external_id, created_at, updated_at, deleted_at?, import_run, imported_at, payload}"
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "soft delete",
+      "readOnly": true
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "principal": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "role",
+            "end_user",
+            "share",
+            "public"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 4000,
+          "description": "the role name for role, the share id for share"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false,
+      "description": "the class of caller the policy applies to"
+    },
+    "applies_to": {
+      "type": "string",
+      "maxLength": 4000,
+      "description": "a model name, or * for every model"
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "read",
+          "create",
+          "update",
+          "delete"
+        ]
+      }
+    },
+    "where": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "a where object of the query grammar; variables @principal.person, @principal.member, @principal.identity, @principal.affiliated_organizations, @share.id, @now"
+    },
+    "fields": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 4000
+      },
+      "description": "field allow-list for read or update"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "origin": {
+      "type": "string",
+      "enum": [
+        "pack",
+        "workspace",
+        "share"
+      ],
+      "description": "who created it",
+      "default": "workspace"
+    }
+  },
+  "required": [
+    "id",
+    "model",
+    "workspace",
+    "revision",
+    "created_at",
+    "updated_at",
+    "created_by",
+    "updated_by",
+    "name",
+    "principal",
+    "applies_to",
+    "actions",
+    "enabled",
+    "origin"
+  ],
+  "additionalProperties": false,
+  "x-model": {
+    "name": "policy",
+    "version": 1,
+    "group": "system",
+    "identity": [
+      [
+        "name"
+      ]
+    ],
+    "status_categories": [],
+    "sensitivity": {},
+    "events": null,
+    "agent_context": "Policies are ANDed into every read and write by end users, guests and the public; members are governed by roles\nand never consult them. Only admins write Policies. Dedupe by name. The one mistake: a `where` written against\nfields the model in applies_to does not have; run it as a query first."
+  },
+  "$defs": {
+    "Ref": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "Principal": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "member",
+            "person",
+            "share",
+            "system"
+          ]
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "Identifier": {
+      "type": "object",
+      "properties": {
+        "system": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "primary": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "system",
+        "value"
+      ],
+      "additionalProperties": false,
+      "description": "An external or natural key. `system` is a registered scheme (email, domain, vat:eu, sha256, stripe:customer, postware:workspace)."
+    }
+  }
+}

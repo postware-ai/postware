@@ -1,0 +1,9 @@
+# Published extension declarations of the support pack: ticket attributes that vendors disagree on or that are
+# not needed on day one. URN urn:postware:ext:support:<name>; stored at ext.support.<name>.
+
+- model: ticket
+  namespace: support
+  name: kind
+  type: string
+  description: "The ticket type in the source's vocabulary: question, incident, problem, task, feedback, or a workspace's own."
+  index: true

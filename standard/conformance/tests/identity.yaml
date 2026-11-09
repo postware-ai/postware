@@ -1,0 +1,202 @@
+# Identity vectors. Create `a`; then `record_upsert` with `b` returns created false and a's id when `merge`
+# is true (and a plain create of `b` fails 409 duplicate), created true otherwise. Rules are tried in order;
+# a path that is null on either record never matches. Format: conformance/README.md.
+
+- name: two people with the same email merge, whatever the case
+  model: person
+  a: { name: { full: "Ada Okonkwo" }, emails: [ { value: "ada@lumenharbor.example", primary: true } ] }
+  b: { name: { full: "A. Okonkwo" }, emails: [ { value: "Ada@LumenHarbor.example" } ] }
+  merge: true
+
+- name: two people with different emails do not merge, even with the same name
+  model: person
+  a: { name: { full: "Sam Odhiambo" }, emails: [ { value: "sam@kelpline.example" } ] }
+  b: { name: { full: "Sam Odhiambo" }, emails: [ { value: "sam.odhiambo@mailbox.example" } ] }
+  merge: false
+
+- name: two people sharing one of several emails merge
+  model: person
+  a: { name: { full: "Rafael Nwosu" }, emails: [ { value: "rafael.nwosu@mailbox.example", primary: true }, { value: "rafael@skiffworks.example" } ] }
+  b: { name: { full: "Rafael Nwosu" }, emails: [ { value: "rafael@skiffworks.example" } ] }
+  merge: true
+
+- name: two organizations with the same domain identifier merge
+  model: organization
+  a: { name: "Lumen Harbor", identifiers: [ { system: domain, value: "lumenharbor.example" } ] }
+  b: { name: "Lumen Harbor Marinas", identifiers: [ { system: domain, value: "LUMENHARBOR.example" } ] }
+  merge: true
+
+- name: two organizations with the same name and different domains do not merge
+  model: organization
+  a: { name: "Harbor Services", identifiers: [ { system: domain, value: "harborservices.example" } ] }
+  b: { name: "Harbor Services", identifiers: [ { system: domain, value: "harbor-services.example" } ] }
+  merge: false
+
+- name: two products with the same sku merge
+  model: product
+  a: { name: "Pro plan", kind: digital, active: true, identifiers: [ { system: sku, value: "KLP-PRO" } ] }
+  b: { name: "Pro plan (annual)", kind: digital, active: true, identifiers: [ { system: sku, value: "KLP-PRO" } ] }
+  merge: true
+
+- name: two products with the same name and different skus do not merge
+  model: product
+  a: { name: "Dock access token", kind: good, active: true, identifiers: [ { system: sku, value: "KLP-TOKEN-01" } ] }
+  b: { name: "Dock access token", kind: good, active: true, identifiers: [ { system: sku, value: "KLP-TOKEN-02" } ] }
+  merge: false
+
+- name: two messages with the same Message-ID merge
+  model: message
+  a:
+    channel: email
+    direction: inbound
+    from: { address: "ada@lumenharbor.example" }
+    to: [ { address: "ingrid@kelpline.example" } ]
+    subject: "Berth billing for the 2027 season"
+    body: "Hello Ingrid."
+    sent_at: "2026-09-28T08:14:00Z"
+    identifiers: [ { system: "email:message-id", value: "a1f0c3d2-9b7e-4e2a-8c1d-5f6e7a8b9c0d@lumenharbor.example" } ]
+  b:
+    channel: email
+    direction: inbound
+    from: { address: "ada@lumenharbor.example" }
+    to: [ { address: "ingrid@kelpline.example" }, { address: "sam@kelpline.example" } ]
+    subject: "Berth billing for the 2027 season"
+    body: "Hello Ingrid. (re-synced)"
+    sent_at: "2026-09-28T08:14:00Z"
+    identifiers: [ { system: "email:message-id", value: "a1f0c3d2-9b7e-4e2a-8c1d-5f6e7a8b9c0d@lumenharbor.example" } ]
+  merge: true
+
+- name: two messages with the same subject and different Message-IDs do not merge
+  model: message
+  a:
+    channel: email
+    direction: inbound
+    from: { address: "ada@lumenharbor.example" }
+    subject: "Berth billing"
+    body: "First."
+    sent_at: "2026-09-28T08:14:00Z"
+    identifiers: [ { system: "email:message-id", value: "11111111-aaaa-4bbb-8ccc-000000000001@lumenharbor.example" } ]
+  b:
+    channel: email
+    direction: inbound
+    from: { address: "ada@lumenharbor.example" }
+    subject: "Berth billing"
+    body: "Second."
+    sent_at: "2026-09-29T08:14:00Z"
+    identifiers: [ { system: "email:message-id", value: "11111111-aaaa-4bbb-8ccc-000000000002@lumenharbor.example" } ]
+  merge: false
+
+- name: two chat messages with the same channel and timestamp merge
+  model: message
+  a: { channel: chat, direction: internal, from: { address: "U01SAM" }, body: "Lumen signed.", sent_at: "2026-10-12T15:58:00Z", identifiers: [ { system: "slack:ts", value: "C0SALES/1760284680.000200" } ] }
+  b: { channel: chat, direction: internal, from: { address: "U01SAM" }, body: "Lumen signed. (edited)", sent_at: "2026-10-12T15:58:00Z", identifiers: [ { system: "slack:ts", value: "C0SALES/1760284680.000200" } ] }
+  merge: true
+
+- name: two teams with the same name merge
+  model: team
+  a: { name: "Support" }
+  b: { name: "Support", description: "Answers tickets." }
+  merge: true
+
+- name: two teams with different source ids but the same name still merge by name
+  model: team
+  a: { name: "Support", identifiers: [ { system: "chat:usergroup", value: "S01" } ] }
+  b: { name: "Support", identifiers: [ { system: "tracker:team-key", value: "SUP" } ] }
+  merge: true
+
+- name: two teams with different names do not merge
+  model: team
+  a: { name: "Support" }
+  b: { name: "Sales" }
+  merge: false
+
+- name: two documents with the same slug, collection and locale merge
+  model: document
+  a: { collection: { model: collection, $fixture: coll-docs }, title: "Getting started", slug: getting-started, locale: en, status: { category: draft }, authors: [ { model: member, $fixture: member-ingrid } ] }
+  b: { collection: { model: collection, $fixture: coll-docs }, title: "Getting started (v2)", slug: getting-started, locale: en, status: { category: draft }, authors: [ { model: member, $fixture: member-ingrid } ] }
+  merge: true
+
+- name: two documents with the same slug in different locales do not merge
+  model: document
+  a: { collection: { model: collection, $fixture: coll-docs }, title: "Getting started", slug: getting-started, locale: en, status: { category: draft }, authors: [ { model: member, $fixture: member-ingrid } ] }
+  b: { collection: { model: collection, $fixture: coll-docs }, title: "Erste Schritte", slug: getting-started, locale: de, status: { category: draft }, authors: [ { model: member, $fixture: member-ingrid } ] }
+  merge: false
+
+- name: two documents with the same slug in different collections do not merge
+  model: document
+  a: { collection: { model: collection, $fixture: coll-site }, title: "Pricing", slug: pricing, locale: en, status: { category: draft }, authors: [ { model: member, $fixture: member-ingrid } ] }
+  b: { collection: { model: collection, $fixture: coll-help }, title: "Pricing", slug: pricing, locale: en, status: { category: draft }, authors: [ { model: member, $fixture: member-ingrid } ] }
+  merge: false
+
+- name: two prices for the same product with the same name merge
+  model: price
+  a: { product: { model: product, $fixture: prod-pro-plan }, name: "Pro monthly", amount: { amount: "20.00", currency: USD }, interval: month, tax_inclusive: false, active: true }
+  b: { product: { model: product, $fixture: prod-pro-plan }, name: "Pro monthly", amount: { amount: "22.00", currency: USD }, interval: month, tax_inclusive: false, active: true }
+  merge: true
+
+- name: two receivable invoices with the same number for the same counterparty merge
+  model: invoice
+  a:
+    number: "INV-0200"
+    direction: receivable
+    counterparty: { model: person, $fixture: person-rafael }
+    status: { category: draft }
+    issued_at: "2026-11-06"
+    currency: USD
+    tax_inclusive: false
+    lines: [ { description: "Starter plan", quantity: "1", unit_price: { amount: "9.00", currency: USD }, amount: { amount: "9.00", currency: USD } } ]
+    subtotal: { amount: "9.00", currency: USD }
+    tax_total: { amount: "0.00", currency: USD }
+    total: { amount: "9.00", currency: USD }
+    amount_paid: { amount: "0.00", currency: USD }
+    amount_due: { amount: "9.00", currency: USD }
+  b:
+    number: "INV-0200"
+    direction: receivable
+    counterparty: { model: person, $fixture: person-rafael }
+    status: { category: open }
+    issued_at: "2026-11-06"
+    due_at: "2026-11-20"
+    currency: USD
+    tax_inclusive: false
+    lines: [ { description: "Starter plan", quantity: "1", unit_price: { amount: "9.00", currency: USD }, amount: { amount: "9.00", currency: USD } } ]
+    subtotal: { amount: "9.00", currency: USD }
+    tax_total: { amount: "0.00", currency: USD }
+    total: { amount: "9.00", currency: USD }
+    amount_paid: { amount: "0.00", currency: USD }
+    amount_due: { amount: "9.00", currency: USD }
+  merge: true
+
+- name: two vendor bills with the same number from different vendors do not merge
+  model: invoice
+  a:
+    number: "2026-11"
+    direction: payable
+    counterparty: { model: organization, $fixture: org-quillcompass }
+    status: { category: open }
+    issued_at: "2026-11-01"
+    due_at: "2026-11-30"
+    currency: GBP
+    tax_inclusive: false
+    lines: [ { description: "Design retainer", quantity: "1", unit_price: { amount: "1500.00", currency: GBP }, amount: { amount: "1500.00", currency: GBP } } ]
+    subtotal: { amount: "1500.00", currency: GBP }
+    tax_total: { amount: "300.00", currency: GBP }
+    total: { amount: "1800.00", currency: GBP }
+    amount_paid: { amount: "0.00", currency: GBP }
+    amount_due: { amount: "1800.00", currency: GBP }
+  b:
+    number: "2026-11"
+    direction: payable
+    counterparty: { model: organization, $fixture: org-tessellate }
+    status: { category: open }
+    issued_at: "2026-11-01"
+    due_at: "2026-11-30"
+    currency: USD
+    tax_inclusive: false
+    lines: [ { description: "Dock tokens", quantity: "10", unit_price: { amount: "35.00", currency: USD }, amount: { amount: "350.00", currency: USD } } ]
+    subtotal: { amount: "350.00", currency: USD }
+    tax_total: { amount: "0.00", currency: USD }
+    total: { amount: "350.00", currency: USD }
+    amount_paid: { amount: "0.00", currency: USD }
+    amount_due: { amount: "350.00", currency: USD }
+  merge: false

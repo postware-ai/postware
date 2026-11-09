@@ -1,0 +1,10 @@
+# Published extension declarations of the billing pack: attributes that only some billing or accounting systems
+# carry, or that need a usage, tax or e-invoicing profile to mean anything. URN urn:postware:ext:billing:<name>;
+# stored at ext.billing.<name>.
+
+- model: price
+  namespace: billing
+  name: trial_days
+  type: int
+  description: "Free trial length in days granted when a subscription starts on this price."
+  index: false

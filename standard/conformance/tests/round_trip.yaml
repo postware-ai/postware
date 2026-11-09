@@ -1,0 +1,21 @@
+# Round-trip vectors: load the fixture packs into a workspace, export in `format`, import into a fresh
+# workspace, compare. Every record must come back with the same id, identifiers, tags and field values,
+# and the count per model must match. Format: conformance/README.md.
+
+- name: a jsonl export re-imports with ids and identifiers intact
+  format: jsonl
+  models: [person, organization, product, invoice, payment]
+  fixtures: [core, system, billing]
+  expect: { ids_preserved: true, identifiers_preserved: true, tags_preserved: true, count_equal: true }
+
+- name: a csv export re-imports by id with identifiers intact
+  format: csv
+  models: [product, tax_rate]
+  fixtures: [core, system, billing]
+  expect: { ids_preserved: true, identifiers_preserved: true, count_equal: true }
+
+- name: references survive a jsonl round trip as the same ids
+  format: jsonl
+  models: [collection, document]
+  fixtures: [core, system, content]
+  expect: { ids_preserved: true, identifiers_preserved: true, count_equal: true, refs_resolve: true }

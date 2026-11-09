@@ -1,0 +1,27 @@
+urn: urn:postware:crm:pipeline
+name: pipeline
+title: Pipeline
+version: 1
+group: crm
+description: An ordered set of stages that Deals move through, each mapped to one of the standard categories open, won or lost. A workspace has one default pipeline.
+agent_context: |
+  Read the default pipeline before creating a Deal and use one of its stage keys; Deal.pipeline is required and
+  the default pipeline is used when you omit it. Every pipeline holds at least one open, one won and one lost
+  stage. Dedupe by name. The one mistake: deleting or re-keying a stage that Deals reference; set archived true
+  and keep the key.
+identity:
+  - [name]
+fields:
+  name:    { type: string, required: true }
+  default: { type: bool, default: false, description: the pipeline new Deals go to when none is given }
+  stages:
+    type: object
+    list: true
+    required: true
+    fields:
+      key:         { type: string, required: true, description: "stable, snake_case; referenced by Deal.stage" }
+      label:       { type: string, required: true }
+      category:    { type: enum, values: [open, won, lost], required: true }
+      order:       { type: int, required: true }
+      probability: { type: decimal, description: "0 to 1; the default for Deal.probability" }
+      archived:    { type: bool, description: "retired; kept because Deals still reference it" }

@@ -1,0 +1,28 @@
+urn: urn:postware:core:event
+name: event
+title: Event
+version: 1
+group: core
+description: "A scheduled block of time: a meeting, a call, an appointment, a reminder. One record per series; a logged call or meeting is an Event too."
+agent_context: |
+  Event is anything with a time slot, past or future; the timeline of a Deal or a Ticket is a query over the Events,
+  Messages, Notes and Tasks about it. Give a recurring Event its IANA timezone so local times survive daylight
+  saving; one Recurrence rule per series, exceptions are ext.calendar.*. Dedupe by the iCalendar uid identifier
+  (system ical:uid). The one mistake: an attendee as free text when a Person or Member exists; set attendees[].ref.
+identity:
+  - [identifiers]
+status:
+  categories: [confirmed, tentative, cancelled]
+fields:
+  title:          { type: string }
+  description:    { type: text }
+  period:         { type: Period, required: true, description: "start inclusive; end exclusive, omitted for a zero-duration event" }
+  timezone:       { type: string, description: IANA zone of start and end }
+  all_day:        { type: bool, default: false }
+  status:         { type: Status, required: true, default: { category: confirmed } }
+  location:       { type: string }
+  conference_url: { type: string }
+  organizer:      { type: Participant }
+  attendees:      { type: Participant, list: true }
+  recurrence:     { type: Recurrence }
+  about:          { type: ref, to: any, list: true }

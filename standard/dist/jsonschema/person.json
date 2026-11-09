@@ -1,0 +1,424 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:postware:core:person",
+  "title": "Person",
+  "description": "A human being: a customer, a contact, an employee, or an end user of the product.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "ULID; generated when absent"
+    },
+    "model": {
+      "type": "string",
+      "description": "name@version",
+      "readOnly": true
+    },
+    "workspace": {
+      "type": "string",
+      "description": "the Workspace record id",
+      "readOnly": true
+    },
+    "revision": {
+      "type": "integer",
+      "description": "optimistic concurrency with If-Match",
+      "readOnly": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "created_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind: member|person|share|system, id}",
+      "readOnly": true
+    },
+    "updated_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind, id}",
+      "readOnly": true
+    },
+    "owner": {
+      "type": "string",
+      "description": "Member id, the accountable operator"
+    },
+    "identifiers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "description": "Identifier[]: the crosswalk"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^([a-z0-9][a-z0-9_-]{0,63}:)?[a-z0-9][a-z0-9_-]{0,63}(/[a-z0-9][a-z0-9_-]{0,63})*$"
+      },
+      "description": "tag slugs, `namespace:slug` form"
+    },
+    "ext": {
+      "type": "object",
+      "description": "declared extensions only"
+    },
+    "source": {
+      "type": "object",
+      "description": "{system, external_id, created_at, updated_at, deleted_at?, import_run, imported_at, payload}"
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "soft delete",
+      "readOnly": true
+    },
+    "name": {
+      "$ref": "#/$defs/Name"
+    },
+    "emails": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ContactPoint"
+      }
+    },
+    "phones": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ContactPoint"
+      },
+      "description": "label mobile, home, fax, work or other"
+    },
+    "urls": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ContactPoint"
+      },
+      "description": "websites and social profiles; the URL identifies the network"
+    },
+    "addresses": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Address"
+      }
+    },
+    "job_title": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "affiliations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Affiliation"
+      },
+      "description": "Organizations this person belongs to, with role, primary flag and period"
+    },
+    "avatar": {
+      "$ref": "#/$defs/Ref",
+      "x-to": [
+        "file"
+      ]
+    },
+    "birthday": {
+      "type": "string",
+      "format": "date"
+    },
+    "locale": {
+      "type": "string",
+      "maxLength": 4000,
+      "description": "BCP 47; the OIDC locale claim"
+    },
+    "timezone": {
+      "type": "string",
+      "maxLength": 4000,
+      "description": "IANA zone; the OIDC zoneinfo claim"
+    },
+    "description": {
+      "type": "string",
+      "contentMediaType": "text/markdown"
+    }
+  },
+  "required": [
+    "id",
+    "model",
+    "workspace",
+    "revision",
+    "created_at",
+    "updated_at",
+    "created_by",
+    "updated_by",
+    "name"
+  ],
+  "additionalProperties": false,
+  "x-model": {
+    "name": "person",
+    "version": 1,
+    "group": "core",
+    "identity": [
+      [
+        "emails.value"
+      ],
+      [
+        "identifiers"
+      ]
+    ],
+    "status_categories": [],
+    "sensitivity": {
+      "birthday": "confidential"
+    },
+    "events": null,
+    "agent_context": "Use Person for any human, whatever their role. Roles live on relationships (affiliations, Deal.people,\nTicket.requester), never on the Person; a lead is a Person with ext.crm.lifecycle_stage lead. Dedupe by email:\nbefore creating, query by emails.value or use upsert. An end user of the product is a Person that holds an\nIdentity; you never create Identities yourself. The one mistake: a second Person for the same human under another\nemail; add the address to emails[] instead."
+  },
+  "$defs": {
+    "Ref": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "Principal": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "member",
+            "person",
+            "share",
+            "system"
+          ]
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "Address": {
+      "type": "object",
+      "properties": {
+        "lines": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 4000
+          }
+        },
+        "locality": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "region": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "postal_code": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "country": {
+          "type": "string",
+          "maxLength": 4000,
+          "pattern": "^[A-Z]{2}$",
+          "description": "ISO 3166-1 alpha-2"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "billing",
+            "shipping",
+            "mailing",
+            "home",
+            "work",
+            "other"
+          ]
+        },
+        "primary": {
+          "type": "boolean"
+        },
+        "geo": {
+          "type": "object",
+          "properties": {
+            "lat": {
+              "type": "string",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+            },
+            "lon": {
+              "type": "string",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+            }
+          },
+          "required": [
+            "lat",
+            "lon"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "lines",
+        "country"
+      ],
+      "additionalProperties": false
+    },
+    "Affiliation": {
+      "type": "object",
+      "properties": {
+        "organization": {
+          "$ref": "#/$defs/Ref",
+          "x-to": [
+            "organization"
+          ]
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "employee",
+            "contractor",
+            "owner",
+            "contact",
+            "member",
+            "other"
+          ]
+        },
+        "primary": {
+          "type": "boolean"
+        },
+        "period": {
+          "$ref": "#/$defs/Period"
+        }
+      },
+      "required": [
+        "organization"
+      ],
+      "additionalProperties": false,
+      "description": "A person's membership of an organization; the job title lives on the Person."
+    },
+    "ContactPoint": {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "label": {
+          "type": "string",
+          "enum": [
+            "work",
+            "home",
+            "mobile",
+            "fax",
+            "billing",
+            "other"
+          ]
+        },
+        "primary": {
+          "type": "boolean"
+        },
+        "verified_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "additionalProperties": false,
+      "description": "One email, phone or URL; used by the emails[], phones[] and urls[] arrays."
+    },
+    "Identifier": {
+      "type": "object",
+      "properties": {
+        "system": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "primary": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "system",
+        "value"
+      ],
+      "additionalProperties": false,
+      "description": "An external or natural key. `system` is a registered scheme (email, domain, vat:eu, sha256, stripe:customer, postware:workspace)."
+    },
+    "Name": {
+      "type": "object",
+      "properties": {
+        "full": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "given": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "family": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "middle": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "prefix": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "suffix": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "nickname": {
+          "type": "string",
+          "maxLength": 4000
+        }
+      },
+      "required": [
+        "full"
+      ],
+      "additionalProperties": false,
+      "description": "A human name (vCard, FHIR HumanName)."
+    },
+    "Period": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "start"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

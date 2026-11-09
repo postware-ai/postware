@@ -1,0 +1,35 @@
+urn: urn:postware:billing:payment
+name: payment
+title: Payment
+version: 1
+group: billing
+description: "Money that moved against invoices: a customer paying us (receivable), us paying a vendor (payable), or a refund of either."
+agent_context: |
+  direction is the ledger side; kind says whether money went the normal way (payment) or back (refund, with
+  refund_of pointing at the original). applied[] says which Invoices this payment settles and by how much; update
+  their amount_paid and status yourself. Payments recorded from accounting systems are succeeded; processor payments
+  carry pending, failed or cancelled. Dedupe by identifier (the processor's or ledger's id). The one mistake: a
+  refund as a negative amount; record a Payment of kind refund.
+identity:
+  - [identifiers]
+status:
+  categories: [pending, succeeded, failed, cancelled]
+fields:
+  direction:    { type: enum, values: [receivable, payable], required: true, default: receivable }
+  kind:         { type: enum, values: [payment, refund], required: true, default: payment }
+  counterparty: { type: ref, to: [organization, person], required: true }
+  amount:       { type: Money, required: true }
+  paid_at:      { type: datetime, required: true }
+  method:       { type: enum, values: [card, bank_transfer, direct_debit, cash, check, wallet, other] }
+  status:       { type: Status, required: true, default: { category: succeeded } }
+  applied:
+    type: object
+    list: true
+    fields:
+      invoice: { type: ref, to: [invoice], required: true }
+      amount:  { type: Money, required: true }
+  refund_of:    { type: ref, to: [payment] }
+  reference:    { type: string, description: "check number, bank reference, processor id or remittance text" }
+events:
+  - { field: status.category, to: succeeded, name: payment.succeeded }
+  - { field: status.category, to: failed, name: payment.failed }

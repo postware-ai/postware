@@ -1,0 +1,30 @@
+urn: urn:postware:core:message
+name: message
+title: Message
+version: 1
+group: core
+description: "One message on a channel: an email, a chat message, an SMS, a call record, with sender, recipients, body and the records it is about. A Ticket's conversation is its Messages."
+agent_context: |
+  Message is a communication that happened or will be sent; internal commentary is a Note. Link it to the Ticket or
+  Deal through about and to its thread through thread_key. Dedupe by identifier: email:message-id (the Message-ID
+  without angle brackets) for mail, slack:ts for chat, <source>:message otherwise. The one mistake: setting
+  delivery on an inbound Message; delivery describes outbound sending.
+identity:
+  - [identifiers]
+fields:
+  channel:     { type: enum, values: [email, chat, sms, phone, web, social, api, other], required: true }
+  direction:   { type: enum, values: [inbound, outbound, internal], required: true }
+  from:        { type: Participant, required: true }
+  to:          { type: Participant, list: true }
+  cc:          { type: Participant, list: true }
+  bcc:         { type: Participant, list: true }
+  reply_to:    { type: Participant, list: true }
+  subject:     { type: string }
+  body:        { type: text, required: true, description: "plain text or Markdown; may be empty when the message is only attachments" }
+  body_html:   { type: text }
+  sent_at:     { type: datetime, required: true, index: true }
+  thread_key:  { type: string, index: true, description: "opaque grouping key: a mail thread id, a chat channel and thread, a ticket id" }
+  in_reply_to: { type: ref, to: [message] }
+  attachments: { type: ref, to: [file], list: true }
+  delivery:    { type: enum, values: [draft, queued, sent, delivered, failed], description: outbound only }
+  about:       { type: ref, to: any, list: true, description: "the Ticket, the Deal" }

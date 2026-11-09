@@ -1,0 +1,20 @@
+urn: urn:postware:system:share
+name: share
+title: Share
+version: 1
+group: system
+description: "A grant of read, and optionally comment, access to records, by ids or by filter, to someone outside the workspace: a link, an email, another workspace or the public. Compiles into Policies for a synthetic principal."
+agent_context: |
+  Share is how records leave the workspace without being copied. Content is published by the Content pack's public
+  policy (a Collection with public: true), the same shape a public Share compiles to. Scope by filter when the set
+  changes over time, by ids when it is fixed. Comment is granted to email grantees only: a Note has an author. A link token is returned once at creation and lives in the credential store, never on the record.
+  The one mistake: deleting a Share to revoke it; set status to revoked, which keeps the audit trail.
+identity: []
+status:
+  categories: [active, revoked]
+fields:
+  scope:       { type: Scope, required: true, description: by ids or by filter }
+  grantee:     { type: Grantee, required: true, description: "link, email, workspace or public" }
+  permissions: { type: enum, values: [read, comment], list: true, required: true }
+  expires_at:  { type: datetime }
+  status:      { type: Status, required: true, default: { category: active } }

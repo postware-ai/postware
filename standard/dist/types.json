@@ -1,0 +1,286 @@
+{
+  "Identifier": {
+    "description": "An external or natural key. `system` is a registered scheme (email, domain, vat:eu, sha256, stripe:customer, postware:workspace).",
+    "fields": {
+      "system": {
+        "type": "string",
+        "required": true
+      },
+      "value": {
+        "type": "string",
+        "required": true
+      },
+      "primary": {
+        "type": "bool"
+      }
+    }
+  },
+  "Name": {
+    "description": "A human name (vCard, FHIR HumanName).",
+    "fields": {
+      "full": {
+        "type": "string",
+        "required": true
+      },
+      "given": {
+        "type": "string"
+      },
+      "family": {
+        "type": "string"
+      },
+      "middle": {
+        "type": "string"
+      },
+      "prefix": {
+        "type": "string"
+      },
+      "suffix": {
+        "type": "string"
+      },
+      "nickname": {
+        "type": "string"
+      }
+    }
+  },
+  "ContactPoint": {
+    "description": "One email, phone or URL; used by the emails[], phones[] and urls[] arrays.",
+    "fields": {
+      "value": {
+        "type": "string",
+        "required": true
+      },
+      "label": {
+        "type": "enum",
+        "values": [
+          "work",
+          "home",
+          "mobile",
+          "fax",
+          "billing",
+          "other"
+        ]
+      },
+      "primary": {
+        "type": "bool"
+      },
+      "verified_at": {
+        "type": "datetime"
+      }
+    }
+  },
+  "Address": {
+    "description": "",
+    "fields": {
+      "lines": {
+        "type": "string",
+        "list": true,
+        "required": true
+      },
+      "locality": {
+        "type": "string"
+      },
+      "region": {
+        "type": "string"
+      },
+      "postal_code": {
+        "type": "string"
+      },
+      "country": {
+        "type": "string",
+        "required": true,
+        "description": "ISO 3166-1 alpha-2",
+        "pattern": "^[A-Z]{2}$"
+      },
+      "kind": {
+        "type": "enum",
+        "values": [
+          "billing",
+          "shipping",
+          "mailing",
+          "home",
+          "work",
+          "other"
+        ]
+      },
+      "primary": {
+        "type": "bool"
+      },
+      "geo": {
+        "type": "object",
+        "fields": {
+          "lat": {
+            "type": "decimal",
+            "required": true
+          },
+          "lon": {
+            "type": "decimal",
+            "required": true
+          }
+        }
+      }
+    }
+  },
+  "Money": {
+    "description": "",
+    "fields": {
+      "amount": {
+        "type": "decimal",
+        "required": true
+      },
+      "currency": {
+        "type": "string",
+        "required": true,
+        "description": "ISO 4217",
+        "pattern": "^[A-Z]{3}$"
+      }
+    }
+  },
+  "Period": {
+    "description": "",
+    "fields": {
+      "start": {
+        "type": "datetime",
+        "required": true
+      },
+      "end": {
+        "type": "datetime"
+      }
+    }
+  },
+  "Status": {
+    "description": "category is the standard (validated per model); state is the workspace's own label.",
+    "fields": {
+      "category": {
+        "type": "string",
+        "required": true
+      },
+      "state": {
+        "type": "string"
+      }
+    }
+  },
+  "Affiliation": {
+    "description": "A person's membership of an organization; the job title lives on the Person.",
+    "fields": {
+      "organization": {
+        "type": "ref",
+        "required": true,
+        "to": [
+          "organization"
+        ]
+      },
+      "role": {
+        "type": "enum",
+        "values": [
+          "employee",
+          "contractor",
+          "owner",
+          "contact",
+          "member",
+          "other"
+        ]
+      },
+      "primary": {
+        "type": "bool"
+      },
+      "period": {
+        "type": "Period"
+      }
+    }
+  },
+  "Recurrence": {
+    "description": "",
+    "fields": {
+      "rrule": {
+        "type": "string",
+        "required": true,
+        "description": "RFC 5545 RRULE"
+      }
+    }
+  },
+  "Scope": {
+    "description": "",
+    "fields": {
+      "model": {
+        "type": "string",
+        "required": true
+      },
+      "ids": {
+        "type": "string",
+        "list": true
+      },
+      "where": {
+        "type": "object",
+        "description": "a query grammar `where` object"
+      }
+    }
+  },
+  "Grantee": {
+    "description": "",
+    "fields": {
+      "kind": {
+        "type": "enum",
+        "required": true,
+        "values": [
+          "link",
+          "email",
+          "workspace",
+          "public"
+        ]
+      },
+      "value": {
+        "type": "string"
+      }
+    }
+  },
+  "SEO": {
+    "description": "",
+    "fields": {
+      "title": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "canonical_url": {
+        "type": "string"
+      },
+      "no_index": {
+        "type": "bool"
+      }
+    }
+  },
+  "Participant": {
+    "description": "A person or address taking part in a message or an event (an RFC 5322 mailbox, a JMAP EmailAddress, an iCalendar ATTENDEE or ORGANIZER). Every field is optional; ref names the Person or Member when one is known, address carries the email, phone number or handle as the channel wrote it.",
+    "fields": {
+      "ref": {
+        "type": "ref",
+        "to": [
+          "person",
+          "member"
+        ]
+      },
+      "name": {
+        "type": "string"
+      },
+      "address": {
+        "type": "string",
+        "description": "email address, phone number or handle, as the channel writes it"
+      },
+      "role": {
+        "type": "string",
+        "description": "events: required, optional or resource (iCalendar ROLE and CUTYPE)"
+      },
+      "status": {
+        "type": "enum",
+        "values": [
+          "accepted",
+          "declined",
+          "tentative",
+          "needs_action"
+        ],
+        "description": "events: the participation status (iCalendar PARTSTAT)"
+      }
+    }
+  }
+}

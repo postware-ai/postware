@@ -1,0 +1,19 @@
+urn: urn:postware:billing:tax_rate
+name: tax_rate
+title: Tax rate
+version: 1
+group: billing
+description: A named tax percentage applied to invoice lines (VAT 20%, GST 5%, a state sales tax), referenced by Products and Invoice lines.
+agent_context: |
+  One TaxRate per rate you charge, referenced from Invoice lines; rate is the total percentage applied to a line,
+  and compound components, jurisdictions and tax kinds are ext.billing.*. Dedupe by a source identifier, then by
+  name. The one mistake: editing a rate that past Invoices reference when the law changes; create a new TaxRate
+  and set active false on the old one.
+identity:
+  - [identifiers]
+  - [name]
+fields:
+  name:        { type: string, required: true }
+  rate:        { type: decimal, required: true, description: "percent: 20 means 20%" }
+  description: { type: string }
+  active:      { type: bool, required: true, default: true }

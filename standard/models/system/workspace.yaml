@@ -1,0 +1,53 @@
+urn: urn:postware:system:workspace
+name: workspace
+title: Workspace
+version: 1
+group: system
+description: "The tenant: one company or one person, holding exactly one of these records, its first. Holds the installed packs and the members, identities, policies, shares, tags and records."
+agent_context: |
+  Workspace is the tenant. You never create one; provisioning does, and a workspace holds exactly one of these
+  records. Read it for the installed packs and the sign-in settings. Dedupe by slug. The one mistake: updating auth
+  without reading it first; the object is replaced whole on update.
+identity:
+  - [slug]
+status:
+  categories: [active, paused, suspended, deleted]
+fields:
+  slug:   { type: string, required: true, index: true, pattern: "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$", description: "URL-safe, unique per server or platform" }
+  name:   { type: string, required: true }
+  kind:   { type: enum, values: [business, personal, platform], default: business }
+  status: { type: Status, required: true, default: { category: active } }
+  avatar: { type: ref, to: [file] }
+  packs:  { type: string, list: true, required: true, default: [], description: installed packs }
+  auth:
+    type: object
+    description: sign-in settings
+    fields:
+      allowed_email_domains: { type: string, list: true, description: "when set, only these domains may sign up as end users" }
+      allowed_redirect_uris: { type: string, list: true, description: "redirect URIs the magic-link and OAuth flows may return to; localhost is always allowed" }
+      allowed_origins:       { type: string, list: true, description: CORS origins }
+      magic_link_from_name:  { type: string }
+      signup:                { type: enum, values: [open, invite_only], default: open, description: whether an unknown email may create an end user }
+      issuers:
+        type: object
+        list: true
+        description: external OIDC issuers this workspace trusts
+        fields:
+          issuer:   { type: string, required: true }
+          audience: { type: string, required: true }
+          jwks_uri: { type: string }
+          claims:
+            type: object
+            description: which claim carries each value
+            fields:
+              subject:        { type: string, default: sub }
+              email:          { type: string, default: email }
+              email_verified: { type: string, default: email_verified }
+              name:           { type: string, default: name }
+              roles:          { type: string }
+          principal:
+            type: object
+            fields:
+              kind:                     { type: enum, values: [end_user, member], required: true }
+              member_role_claim_values: { type: object, description: "role name to claim value, for member issuers" }
+              auto_join:                { type: bool, description: "for member issuers: add anyone the issuer vouches for as a Member; off means invited or bound people only" }

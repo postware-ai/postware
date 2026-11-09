@@ -1,0 +1,26 @@
+urn: urn:postware:system:identity
+name: identity
+title: Identity
+version: 1
+group: system
+description: "How a principal authenticates: a provider's stable subject bound to a Member (an operator) or a Person (an end user), with the asserted email and the kinds of factor used. Credential material lives in the auth store, never here."
+agent_context: |
+  Identity is written by the auth component when someone signs in; you never create or edit one. A Person with an
+  Identity is an end user. Dedupe by (provider, subject); an email is never an Identity key, only a Person one.
+  The one mistake: looking for passwords or tokens here; credentials are never stored on records.
+identity:
+  - [provider, subject]
+status:
+  categories: [active, disabled]
+fields:
+  principal:      { type: ref, to: [member, person], required: true, description: operator or end user }
+  provider:       { type: string, required: true, description: "builtin, or the issuer URL of an external provider" }
+  subject:        { type: string, required: true, description: the provider's stable id (OIDC sub) }
+  email:          { type: string, description: the address this login asserts; never a key }
+  email_verified: { type: bool, required: true, default: false }
+  factors:        { type: enum, values: [magic_link, password, passkey, totp, sms, oauth, saml, api_key], list: true, required: true, default: [], description: the kinds of credential used; device and enrolment details live in the auth store }
+  claims:         { type: object, description: mapped provider claims; never tokens }
+  status:         { type: Status, required: true, default: { category: active } }
+  last_seen_at:   { type: datetime, description: touched at most once an hour; drives the monthly active user count }
+sensitivity:
+  claims: confidential

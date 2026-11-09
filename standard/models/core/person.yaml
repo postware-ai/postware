@@ -1,0 +1,30 @@
+urn: urn:postware:core:person
+name: person
+title: Person
+version: 1
+group: core
+description: "A human being: a customer, a contact, an employee, or an end user of the product."
+agent_context: |
+  Use Person for any human, whatever their role. Roles live on relationships (affiliations, Deal.people,
+  Ticket.requester), never on the Person; a lead is a Person with ext.crm.lifecycle_stage lead. Dedupe by email:
+  before creating, query by emails.value or use upsert. An end user of the product is a Person that holds an
+  Identity; you never create Identities yourself. The one mistake: a second Person for the same human under another
+  email; add the address to emails[] instead.
+identity:
+  - [emails.value]
+  - [identifiers]
+fields:
+  name:         { type: Name, required: true }
+  emails:       { type: ContactPoint, list: true }
+  phones:       { type: ContactPoint, list: true, description: "label mobile, home, fax, work or other" }
+  urls:         { type: ContactPoint, list: true, description: "websites and social profiles; the URL identifies the network" }
+  addresses:    { type: Address, list: true }
+  job_title:    { type: string }
+  affiliations: { type: Affiliation, list: true, description: "Organizations this person belongs to, with role, primary flag and period" }
+  avatar:       { type: ref, to: [file] }
+  birthday:     { type: date }
+  locale:       { type: string, description: "BCP 47; the OIDC locale claim" }
+  timezone:     { type: string, description: "IANA zone; the OIDC zoneinfo claim" }
+  description:  { type: text }
+sensitivity:
+  birthday: confidential

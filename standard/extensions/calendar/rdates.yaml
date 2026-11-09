@@ -1,0 +1,10 @@
+# Published extension declarations for Events: recurrence exceptions and the per-event settings calendars
+# disagree on. URN urn:postware:ext:calendar:<name>; stored at ext.calendar.<name>. The core carries one RRULE per
+# series; these declarations carry the rest of RFC 5545.
+
+- model: event
+  namespace: calendar
+  name: rdates
+  type: string
+  description: "RFC 5545 RDATE: extra occurrences added to the series, as a comma-separated list of date-times."
+  index: false

@@ -1,0 +1,18 @@
+urn: urn:postware:core:note
+name: note
+title: Note
+version: 1
+group: core
+description: "Free text about one or more records: an internal note, a comment, a meeting summary. A Note about exactly one record is a comment on it."
+agent_context: |
+  Note is the only place for commentary; a conversation with a customer is Messages. Always set about (the records
+  it concerns) and author. Dedupe by identifier only. The one mistake: visibility shared on a Note meant for the
+  team; shared Notes are readable by the end users who can read the record they are about.
+identity:
+  - [identifiers]
+fields:
+  body:        { type: text, required: true, description: Markdown }
+  author:      { type: ref, to: [member, person], required: true, description: a guest's comment is a Note by a Person }
+  about:       { type: ref, to: any, list: true, required: true, description: "one record makes it a comment; several make a CRM note" }
+  visibility:  { type: enum, values: [internal, shared], default: internal }
+  attachments: { type: ref, to: [file], list: true }

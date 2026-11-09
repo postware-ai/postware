@@ -1,0 +1,10 @@
+# Published extension declarations of the billing pack: attributes that only some billing or accounting systems
+# carry, or that need a usage, tax or e-invoicing profile to mean anything. URN urn:postware:ext:billing:<name>;
+# stored at ext.billing.<name>.
+
+- model: tax_rate
+  namespace: billing
+  name: jurisdiction
+  type: object
+  description: "Where the rate applies: { country (ISO 3166-1 alpha-2), region }."
+  index: false

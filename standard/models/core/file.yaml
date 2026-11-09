@@ -1,0 +1,24 @@
+urn: urn:postware:core:file
+name: file
+title: File
+version: 1
+group: core
+description: Stored or referenced binary content with a name and a type. The bytes live in object storage or on disk; the record holds the name, type, size and location.
+agent_context: |
+  Create a File through the upload flow (upload-url, then complete), not by hand, so the storage key and the sha256
+  identifier are right. Dedupe by identifier: the server adds {system: sha256} for stored bytes; sources may add
+  md5, sha1, crc32, quickxor or dropbox:content-hash, and <source>:file for their own ids. The one mistake: a URL to
+  an external file stored as a File; a File is bytes the workspace holds or a source system stores.
+identity:
+  - [identifiers]
+fields:
+  name:      { type: string, required: true }
+  mime_type: { type: string, required: true, description: "detected by the server; importers fall back to the extension or application/octet-stream" }
+  size:      { type: int, description: "bytes; absent for native cloud documents" }
+  storage:
+    type: object
+    required: true
+    fields:
+      provider: { type: string, required: true, description: "local, s3, or a source system" }
+      key:      { type: string, required: true }
+  about:     { type: ref, to: any, list: true }

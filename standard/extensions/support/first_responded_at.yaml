@@ -1,0 +1,9 @@
+# Published extension declarations of the support pack: ticket attributes that vendors disagree on or that are
+# not needed on day one. URN urn:postware:ext:support:<name>; stored at ext.support.<name>.
+
+- model: ticket
+  namespace: support
+  name: first_responded_at
+  type: datetime
+  description: "When the team first replied to the requester; the start of SLA reporting."
+  index: false

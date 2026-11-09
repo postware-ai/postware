@@ -1,0 +1,9 @@
+# Published extension declarations for Tasks: scheduling, effort and ordering attributes that differ per tool.
+# URN urn:postware:ext:work:<name>; stored at ext.work.<name>.
+
+- model: task
+  namespace: work
+  name: start
+  type: datetime
+  description: "When work is planned to start."
+  index: false

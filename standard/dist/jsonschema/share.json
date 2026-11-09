@@ -1,0 +1,267 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:postware:system:share",
+  "title": "Share",
+  "description": "A grant of read, and optionally comment, access to records, by ids or by filter, to someone outside the workspace: a link, an email, another workspace or the public. Compiles into Policies for a synthetic principal.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "ULID; generated when absent"
+    },
+    "model": {
+      "type": "string",
+      "description": "name@version",
+      "readOnly": true
+    },
+    "workspace": {
+      "type": "string",
+      "description": "the Workspace record id",
+      "readOnly": true
+    },
+    "revision": {
+      "type": "integer",
+      "description": "optimistic concurrency with If-Match",
+      "readOnly": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "created_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind: member|person|share|system, id}",
+      "readOnly": true
+    },
+    "updated_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind, id}",
+      "readOnly": true
+    },
+    "owner": {
+      "type": "string",
+      "description": "Member id, the accountable operator"
+    },
+    "identifiers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "description": "Identifier[]: the crosswalk"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^([a-z0-9][a-z0-9_-]{0,63}:)?[a-z0-9][a-z0-9_-]{0,63}(/[a-z0-9][a-z0-9_-]{0,63})*$"
+      },
+      "description": "tag slugs, `namespace:slug` form"
+    },
+    "ext": {
+      "type": "object",
+      "description": "declared extensions only"
+    },
+    "source": {
+      "type": "object",
+      "description": "{system, external_id, created_at, updated_at, deleted_at?, import_run, imported_at, payload}"
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "soft delete",
+      "readOnly": true
+    },
+    "scope": {
+      "$ref": "#/$defs/Scope",
+      "description": "by ids or by filter"
+    },
+    "grantee": {
+      "$ref": "#/$defs/Grantee",
+      "description": "link, email, workspace or public"
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "read",
+          "comment"
+        ]
+      }
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "$ref": "#/$defs/Status",
+      "x-categories": [
+        "active",
+        "revoked"
+      ],
+      "default": {
+        "category": "active"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "model",
+    "workspace",
+    "revision",
+    "created_at",
+    "updated_at",
+    "created_by",
+    "updated_by",
+    "scope",
+    "grantee",
+    "permissions",
+    "status"
+  ],
+  "additionalProperties": false,
+  "x-model": {
+    "name": "share",
+    "version": 1,
+    "group": "system",
+    "identity": [],
+    "status_categories": [
+      "active",
+      "revoked"
+    ],
+    "sensitivity": {},
+    "events": null,
+    "agent_context": "Share is how records leave the workspace without being copied. Content is published by the Content pack's public\npolicy (a Collection with public: true), the same shape a public Share compiles to. Scope by filter when the set\nchanges over time, by ids when it is fixed. Comment is granted to email grantees only: a Note has an author. A link token is returned once at creation and lives in the credential store, never on the record.\nThe one mistake: deleting a Share to revoke it; set status to revoked, which keeps the audit trail."
+  },
+  "$defs": {
+    "Ref": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "Principal": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "member",
+            "person",
+            "share",
+            "system"
+          ]
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "Grantee": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "link",
+            "email",
+            "workspace",
+            "public"
+          ]
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 4000
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false
+    },
+    "Identifier": {
+      "type": "object",
+      "properties": {
+        "system": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "primary": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "system",
+        "value"
+      ],
+      "additionalProperties": false,
+      "description": "An external or natural key. `system` is a registered scheme (email, domain, vat:eu, sha256, stripe:customer, postware:workspace)."
+    },
+    "Scope": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 4000
+          }
+        },
+        "where": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "a query grammar `where` object"
+        }
+      },
+      "required": [
+        "model"
+      ],
+      "additionalProperties": false
+    },
+    "Status": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "state": {
+          "type": "string",
+          "maxLength": 4000
+        }
+      },
+      "required": [
+        "category"
+      ],
+      "additionalProperties": false,
+      "description": "category is the standard (validated per model); state is the workspace's own label."
+    }
+  }
+}

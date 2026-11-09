@@ -1,0 +1,9 @@
+# Published extension declarations for Tasks: scheduling, effort and ordering attributes that differ per tool.
+# URN urn:postware:ext:work:<name>; stored at ext.work.<name>.
+
+- model: task
+  namespace: work
+  name: estimate
+  type: duration
+  description: "The effort estimate as an ISO 8601 duration; points and other units stay in source.payload."
+  index: false

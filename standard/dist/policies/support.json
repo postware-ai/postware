@@ -1,0 +1,102 @@
+[
+  {
+    "actions": [
+      "read",
+      "create"
+    ],
+    "applies_to": "ticket",
+    "enabled": true,
+    "fields": null,
+    "name": "end user reads and creates own tickets",
+    "origin": "pack",
+    "principal": {
+      "kind": "end_user"
+    },
+    "where": {
+      "requester": "@principal.person"
+    }
+  },
+  {
+    "actions": [
+      "read"
+    ],
+    "applies_to": "message",
+    "enabled": true,
+    "fields": null,
+    "name": "end user reads messages about own tickets",
+    "origin": "pack",
+    "principal": {
+      "kind": "end_user"
+    },
+    "where": {
+      "about": {
+        "any": {
+          "model": "ticket",
+          "where": {
+            "requester": "@principal.person"
+          }
+        }
+      }
+    }
+  },
+  {
+    "actions": [
+      "read"
+    ],
+    "applies_to": "note",
+    "enabled": true,
+    "fields": null,
+    "name": "end user reads shared notes about own tickets",
+    "origin": "pack",
+    "principal": {
+      "kind": "end_user"
+    },
+    "where": {
+      "and": [
+        {
+          "visibility": "shared"
+        },
+        {
+          "about": {
+            "any": {
+              "model": "ticket",
+              "where": {
+                "requester": "@principal.person"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "actions": [
+      "create"
+    ],
+    "applies_to": "message",
+    "enabled": true,
+    "fields": null,
+    "name": "end user sends messages about own tickets",
+    "origin": "pack",
+    "principal": {
+      "kind": "end_user"
+    },
+    "where": {
+      "and": [
+        {
+          "from.ref": "@principal.person"
+        },
+        {
+          "about": {
+            "any": {
+              "model": "ticket",
+              "where": {
+                "requester": "@principal.person"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+]

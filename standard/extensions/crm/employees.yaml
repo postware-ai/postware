@@ -1,0 +1,10 @@
+# Published extension declarations of the CRM pack. URN urn:postware:ext:crm:<name>; stored at ext.crm.<name>
+# and filtered with { "ext.crm.<name>": ... }. Shape: ExtensionDecl (docs/spec/09-go-contracts.md), one entry per
+# model the extension applies to.
+
+- model: organization
+  namespace: crm
+  name: employees
+  type: int
+  description: "Number of employees; a band from the source (1-10, 11-50) is kept in source.payload."
+  index: false

@@ -1,0 +1,17 @@
+urn: urn:postware:core:team
+name: team
+title: Team
+version: 1
+group: core
+description: A named group of Members that work is assigned to.
+agent_context: |
+  Team groups Members of this workspace (operators), not Persons; a customer's departments are Organizations with a
+  parent. Dedupe by a source identifier, then by name. Hierarchy, group type and a lead are ext.org.*; the
+  accountable operator is the envelope's owner. The one mistake: adding a Person to members; only Members belong.
+identity:
+  - [identifiers]
+  - [name]
+fields:
+  name:        { type: string, required: true }
+  description: { type: text }
+  members:     { type: ref, to: [member], list: true }

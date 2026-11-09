@@ -1,0 +1,10 @@
+# Published extension declarations for Events: recurrence exceptions and the per-event settings calendars
+# disagree on. URN urn:postware:ext:calendar:<name>; stored at ext.calendar.<name>. The core carries one RRULE per
+# series; these declarations carry the rest of RFC 5545.
+
+- model: event
+  namespace: calendar
+  name: recurrence_id
+  type: datetime
+  description: "RFC 5545 RECURRENCE-ID on a modified occurrence: the original start of the instance this record overrides; the series master is found by the shared ical:uid identifier."
+  index: true

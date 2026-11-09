@@ -1,0 +1,29 @@
+urn: urn:postware:system:member
+name: member
+title: Member
+version: 1
+group: system
+description: "An operator of the workspace: a person on the team, an agent or a service, with roles. Authorization, audit and the owner and assignee fields point at Members."
+agent_context: |
+  Member is who operates the workspace, including you: an agent runs as the Member its API key was created for.
+  End users of the product are never Members; they are Persons with an Identity, and a guest is a Person with a
+  Share, not a role. Dedupe by person, or by the invitation email while invited. The one mistake: creating a
+  Member to represent a customer or a contact; create a Person instead.
+identity:
+  - [person]
+  - [invitation.email]
+status:
+  categories: [invited, active, suspended]
+fields:
+  kind:         { type: enum, values: [person, agent, service], required: true }
+  display_name: { type: string, required: true }
+  person:       { type: ref, to: [person], description: the operator's own Person record }
+  roles:        { type: string, list: true, required: true, description: "owner, admin, member, or a custom role name that policies grant" }
+  status:       { type: Status, required: true, default: { category: active } }
+  invitation:
+    type: object
+    description: set while status is invited; the magic link sent to this email activates the Member
+    fields:
+      email:      { type: string, required: true }
+      invited_by: { type: ref, to: [member] }
+      expires_at: { type: datetime }

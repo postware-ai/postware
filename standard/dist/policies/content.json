@@ -1,0 +1,53 @@
+[
+  {
+    "actions": [
+      "read"
+    ],
+    "applies_to": "document",
+    "enabled": true,
+    "fields": null,
+    "name": "public reads published documents in public collections",
+    "origin": "pack",
+    "principal": {
+      "kind": "public"
+    },
+    "where": {
+      "and": [
+        {
+          "status.category": "published"
+        },
+        {
+          "published_at": {
+            "lte": "@now"
+          }
+        },
+        {
+          "collection": {
+            "in": {
+              "model": "collection",
+              "where": {
+                "public": true
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "actions": [
+      "read"
+    ],
+    "applies_to": "collection",
+    "enabled": true,
+    "fields": null,
+    "name": "public reads public collections",
+    "origin": "pack",
+    "principal": {
+      "kind": "public"
+    },
+    "where": {
+      "public": true
+    }
+  }
+]

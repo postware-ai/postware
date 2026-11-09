@@ -1,0 +1,172 @@
+# The CSV importer manifest.
+#
+# Documents the `mapping` object accepted by POST /w/{ws}/v1/imports (docs/spec/05-api.md section 7),
+# by the `import_run` MCP tool and by `a import csv --mapping`. A CSV import maps the columns of one
+# file onto one model: one row becomes one record, written through the ordinary write path
+# (validation, identity rules, references, extensions, tags, policies, quotas), with provenance in the
+# envelope's `source` and an ImportRun record for the whole run.
+
+source: csv
+version: 1
+title: CSV
+description: >
+  One CSV file, one model. The agent proposes the mapping from the headers and a few sample rows,
+  runs it with dry_run true, reads the ImportRun's counts and errors, fixes the mapping or the file,
+  then runs it for real. Values are copied as written: dates must already be ISO 8601, amounts plain
+  decimal strings, enum and status values the standard's own; the agent normalises the file first.
+
+# ---------------------------------------------------------------------------------------------------
+# The request. The same object is the input of the import_run tool; `a import csv` takes the parts as
+# flags and uploads the file itself.
+request:
+  source:    { type: string, required: true, description: always `csv` for this manifest }
+  model: { type: string, required: true, description: "the target model's name, e.g. person" }
+  file_id:   { type: string, required: true, description: the id of the uploaded File record that holds the CSV }
+  mapping:   { type: object, required: true, description: the mapping object below }
+  mode:      { type: enum, values: [once], default: once, description: CSV imports run once; continuous mode is for live sources }
+  dry_run:   { type: bool, default: false, description: "validate, resolve identity and evaluate policies for every row without writing" }
+
+# ---------------------------------------------------------------------------------------------------
+# The mapping object.
+mapping:
+  columns:
+    type: object
+    required: true
+    description: >
+      Header to target path. Each key is a column header exactly as it appears in the file's first
+      row; each value is a target path in the grammar below. Columns not listed are ignored (their
+      values survive in source.payload). Empty cells set nothing.
+  constants:
+    type: object
+    description: >
+      A partial record merged into every row before the columns are applied: fields, list elements,
+      `identifiers`, `tags`, `ext`, `owner`. A list element in constants and a column with the same
+      index address the same element, so `constants.identifiers[0].system` and a column mapped to
+      `identifiers[0].value` make one Identifier.
+  identity:
+    type: enum
+    values: [none, identity]
+    default: none
+    description: >
+      How a row finds an existing record. `none` (the default, also when absent) creates every row;
+      a row that matches an existing record by one of the model's identity rules fails with code
+      `duplicate`. `identity` upserts by the model's identity rules in order, like
+      record_upsert: a match updates the existing record (keeping its id, unioning its
+      identifiers), no match creates one. These are the only two values: the store matches every
+      identity rule of the model or none and cannot select one rule by name, so `email`,
+      `number` or any other rule's field is rejected with code `invalid` at mapping.identity.
+
+# ---------------------------------------------------------------------------------------------------
+# Target path grammar (the right-hand side of `columns`).
+paths:
+  - pattern: field
+    example: number
+    meaning: a top-level scalar field
+  - pattern: field.sub
+    example: name.given
+    meaning: a field of a value type or inline object
+  - pattern: list[i].sub
+    example: emails[0].value
+    meaning: element i (zero-based) of a list field; elements are created as needed and merged with constants by index
+  - pattern: ext.<namespace>.<name>
+    example: ext.crm.lifecycle_stage
+    meaning: a declared extension; undeclared extensions fail the row with code `extension_undeclared`
+  - pattern: identifiers[i].value
+    example: identifiers[0].value
+    meaning: an external id; the system comes from constants (`identifiers[i].system`)
+  - pattern: tags[i]
+    example: tags[0]
+    meaning: a tag slug, created in the workspace namespace when missing (importers write source labels as `<source>:<slug>`)
+  - pattern: path@model.field
+    example: affiliations[0].organization@organization.name
+    meaning: >
+      the cell names a related record of `model` by `field`: found by exact, case-insensitive
+      match on that field, created with only that field when missing, never updated; the reference
+      is written at `path`. For a polymorphic reference (counterparty) the model after `@`
+      decides which kind is created.
+
+# ---------------------------------------------------------------------------------------------------
+# Rules the runtime applies to every row.
+rules:
+  - Each row is validated as a create (required fields, enums, status categories, references) or as an update of the matched record; a row that fails is counted in counts.<model>.errors and listed in errors with its row number, path and code, and the run continues.
+  - name.full is derived from name.given, name.middle and name.family, joined by single spaces, when a row ends up with some of those and no name.full (from a column or a constant), because contact exports never carry a full-name column.
+  - Email and domain values are lower-cased before matching; nothing else is transformed.
+  - "Every written record, created or updated, and every related record a row creates, carries source = {system: csv, external_id: <the 1-based data row number, as a string>, import_run: <run id>, imported_at, payload: <the raw row as header -> cell, every column whether mapped or not>} and the tag sys:imported, added to the row's tags on a create and to the record's existing tags on an update."
+  - A row whose related record (`@model.field`) cannot be created because the principal may not create that model fails with code `forbidden`; the main record is not written either.
+  - dry_run runs every step but the write and reports the same counts, errors and status in the ImportRun it returns; that ImportRun is not saved (it has no id, and GET /v1/imports finds nothing for it) and nothing else is written, not a record, a tag or an event.
+  - The run's status is succeeded when every row was written, partial when some failed, failed when none could be written or the file could not be read.
+
+# ---------------------------------------------------------------------------------------------------
+examples:
+
+  - name: person from a HubSpot contacts export
+    model: person
+    notes: >
+      Headers as HubSpot's contacts export writes them. Address columns are left unmapped because
+      the export carries country names, not ISO 3166-1 alpha-2 codes; map them after normalising.
+      HubSpot writes lifecycle stages as marketingqualifiedlead and salesqualifiedlead; the
+      crm.lifecycle_stage enum spells them marketing_qualified_lead and sales_qualified_lead, so
+      normalise the two values before importing, or those rows fail with code invalid_enum and the
+      rest import. identity identity matches existing people by the model's identity rules (any
+      email, case-insensitively, or the hubspot:contact identifier), so re-running the import
+      updates rather than duplicates.
+    mapping:
+      columns:
+        "Email": emails[0].value
+        "First Name": name.given
+        "Last Name": name.family
+        "Phone Number": phones[0].value
+        "Website URL": urls[0].value
+        "Job Title": job_title
+        "Company Name": affiliations[0].organization@organization.name
+        "Lifecycle Stage": ext.crm.lifecycle_stage
+        "Original Source": ext.crm.source
+        "Record ID": identifiers[0].value
+      constants:
+        emails: [ { label: work } ]
+        identifiers: [ { system: "hubspot:contact" } ]
+        tags: ["hubspot:contacts"]
+      identity: identity
+
+  - name: invoice from a QuickBooks invoices export
+    model: invoice
+    notes: >
+      An "Invoice List" report exported to CSV has Date, Num, Customer, Due Date, Amount, Open
+      Balance, Terms and Memo/Description, with US dates and formatted amounts. Before importing,
+      the agent rewrites dates as YYYY-MM-DD, amounts as plain decimals, and adds the derived
+      columns the model needs and the report lacks: Subtotal and Tax (from the invoice detail,
+      or Subtotal = Amount and Tax = 0.00 when tax is not tracked), Paid = Amount minus Open
+      Balance, and Line Description, Line Unit Price and Line Amount (Memo/Description and Amount)
+      so the one required line exists. Open invoices only: a mixed export is split by status and
+      imported once per status category, because the mapping carries no value transforms. identity
+      identity makes a second run update the invoices it already created: an invoice's identity
+      rules are its identifiers and (direction, counterparty, number).
+    mapping:
+      columns:
+        "Num": number
+        "Customer": counterparty@organization.name
+        "Date": issued_at
+        "Due Date": due_at
+        "Subtotal": subtotal.amount
+        "Tax": tax_total.amount
+        "Amount": total.amount
+        "Paid": amount_paid.amount
+        "Open Balance": amount_due.amount
+        "Terms": terms
+        "Memo/Description": memo
+        "Line Description": lines[0].description
+        "Line Unit Price": lines[0].unit_price.amount
+        "Line Amount": lines[0].amount.amount
+      constants:
+        direction: receivable
+        currency: USD
+        tax_inclusive: false
+        status: { category: open }
+        subtotal: { currency: USD }
+        tax_total: { currency: USD }
+        total: { currency: USD }
+        amount_paid: { currency: USD }
+        amount_due: { currency: USD }
+        lines: [ { quantity: "1", unit_price: { currency: USD }, amount: { currency: USD } } ]
+        tags: ["quickbooks:invoices"]
+      identity: identity

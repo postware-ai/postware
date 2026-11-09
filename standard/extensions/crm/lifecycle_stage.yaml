@@ -1,0 +1,19 @@
+# Published extension declarations of the CRM pack. URN urn:postware:ext:crm:<name>; stored at ext.crm.<name>
+# and filtered with { "ext.crm.<name>": ... }. Shape: ExtensionDecl (docs/spec/09-go-contracts.md), one entry per
+# model the extension applies to.
+
+- model: person
+  namespace: crm
+  name: lifecycle_stage
+  type: enum
+  description: "Where this person stands in the marketing and sales lifecycle, from subscriber to evangelist (the HubSpot stages, snake_case). A lead is a Person with lifecycle_stage lead; there is no Lead model."
+  enum: [subscriber, lead, marketing_qualified_lead, sales_qualified_lead, opportunity, customer, evangelist, other]
+  index: true
+
+- model: organization
+  namespace: crm
+  name: lifecycle_stage
+  type: enum
+  description: "Where this organization stands in the marketing and sales lifecycle, from subscriber to evangelist."
+  enum: [subscriber, lead, marketing_qualified_lead, sales_qualified_lead, opportunity, customer, evangelist, other]
+  index: true

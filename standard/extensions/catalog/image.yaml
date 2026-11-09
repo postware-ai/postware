@@ -1,0 +1,9 @@
+# Published extension declarations for Products beyond the core catalogue entry. URN urn:postware:ext:catalog:<name>;
+# stored at ext.catalog.<name>. image holds a File id as a string because extension declarations carry no reference type.
+
+- model: product
+  namespace: catalog
+  name: image
+  type: string
+  description: "The id of the File holding the product image."
+  index: false

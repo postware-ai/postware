@@ -1,0 +1,29 @@
+urn: urn:postware:core:task
+name: task
+title: Task
+version: 1
+group: core
+description: A unit of work with a status, a priority, assignees and a due date. It nests under a parent Task and belongs to one Project.
+agent_context: |
+  Task is work someone has to do; a reminder at a time is an Event, a request from a customer is a Ticket. Use
+  due_on for a date and due_at only when the source has a time of day. Blocked is a state label under open or
+  in_progress, not a category. Dedupe by identifier only, so search open Tasks by title before creating one.
+  The one mistake: setting status.category to done without completed_at; set both.
+identity:
+  - [identifiers]
+status:
+  categories: [open, in_progress, done, cancelled]
+fields:
+  title:        { type: string, required: true }
+  description:  { type: text }
+  status:       { type: Status, required: true, default: { category: open } }
+  priority:     { type: enum, values: [urgent, high, normal, low] }
+  assignees:    { type: ref, to: [member], list: true }
+  due_on:       { type: date, index: true }
+  due_at:       { type: datetime, description: set only when the source has a time of day }
+  completed_at: { type: datetime }
+  parent:       { type: ref, to: [task] }
+  project:      { type: ref, to: [project] }
+  about:        { type: ref, to: any, list: true }
+events:
+  - { field: status.category, to: done, name: task.completed }

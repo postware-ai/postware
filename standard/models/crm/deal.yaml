@@ -1,0 +1,37 @@
+urn: urn:postware:crm:deal
+name: deal
+title: Deal
+version: 1
+group: crm
+description: A potential sale to an Organization or a Person, tracked through a Pipeline, with an amount, a probability and an expected close. Won or lost is the status category.
+agent_context: |
+  Deal is the opportunity, not the customer: the customer is the Organization or Person it points at. Set stage
+  to a key of its Pipeline; status.category follows that stage's category unless you set it (a deal can be lost
+  from any stage), and won emits deal.won. people[] holds the contacts on the deal, one marked primary. Dedupe by
+  identifier only, so query open Deals for the same Organization before creating one. The one mistake: products,
+  quantities and prices on the Deal; they belong on the quote or the Invoice.
+identity:
+  - [identifiers]
+status:
+  categories: [open, won, lost]
+fields:
+  name:           { type: string, required: true }
+  organization:   { type: ref, to: [organization] }
+  people:
+    type: object
+    list: true
+    fields:
+      person:  { type: ref, to: [person], required: true }
+      primary: { type: bool }
+      role:    { type: string, description: "e.g. decision maker, billing contact" }
+  pipeline:       { type: ref, to: [pipeline], required: true }
+  stage:          { type: string, required: true, index: true, description: a stage key of the pipeline }
+  status:         { type: Status, required: true, default: { category: open }, description: category defaults from the stage's category }
+  amount:         { type: Money }
+  probability:    { type: decimal, description: "0 to 1; defaults from the stage" }
+  expected_close: { type: date }
+  closed_at:      { type: datetime, description: set when status.category leaves open }
+  description:    { type: text }
+events:
+  - { field: status.category, to: won, name: deal.won }
+  - { field: status.category, to: lost, name: deal.lost }

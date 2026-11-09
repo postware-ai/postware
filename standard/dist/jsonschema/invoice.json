@@ -1,0 +1,504 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:postware:billing:invoice",
+  "title": "Invoice",
+  "description": "A statement of money owed for goods or services: receivable when we issued it, payable when we received it (a bill). Lines with amounts and taxes, totals, a status from draft to paid, and the payments applied to it.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "ULID; generated when absent"
+    },
+    "model": {
+      "type": "string",
+      "description": "name@version",
+      "readOnly": true
+    },
+    "workspace": {
+      "type": "string",
+      "description": "the Workspace record id",
+      "readOnly": true
+    },
+    "revision": {
+      "type": "integer",
+      "description": "optimistic concurrency with If-Match",
+      "readOnly": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "created_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind: member|person|share|system, id}",
+      "readOnly": true
+    },
+    "updated_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind, id}",
+      "readOnly": true
+    },
+    "owner": {
+      "type": "string",
+      "description": "Member id, the accountable operator"
+    },
+    "identifiers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "description": "Identifier[]: the crosswalk"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^([a-z0-9][a-z0-9_-]{0,63}:)?[a-z0-9][a-z0-9_-]{0,63}(/[a-z0-9][a-z0-9_-]{0,63})*$"
+      },
+      "description": "tag slugs, `namespace:slug` form"
+    },
+    "ext": {
+      "type": "object",
+      "description": "declared extensions only"
+    },
+    "source": {
+      "type": "object",
+      "description": "{system, external_id, created_at, updated_at, deleted_at?, import_run, imported_at, payload}"
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "soft delete",
+      "readOnly": true
+    },
+    "number": {
+      "type": "string",
+      "maxLength": 4000,
+      "description": "required once status is not draft; unique per workspace when receivable, per counterparty when payable"
+    },
+    "direction": {
+      "type": "string",
+      "enum": [
+        "receivable",
+        "payable"
+      ],
+      "description": "a bill is a payable Invoice",
+      "default": "receivable"
+    },
+    "counterparty": {
+      "$ref": "#/$defs/Ref",
+      "x-to": [
+        "organization",
+        "person"
+      ]
+    },
+    "bill_to": {
+      "$ref": "#/$defs/Address",
+      "description": "the billing address as printed; defaults from the counterparty"
+    },
+    "status": {
+      "$ref": "#/$defs/Status",
+      "x-categories": [
+        "draft",
+        "open",
+        "paid",
+        "void",
+        "uncollectible"
+      ],
+      "default": {
+        "category": "draft"
+      }
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "due_at": {
+      "type": "string",
+      "format": "date",
+      "description": "due_at or terms is given when amount_due is above zero"
+    },
+    "terms": {
+      "type": "string",
+      "maxLength": 4000,
+      "description": "payment terms as text, e.g. Net 30"
+    },
+    "currency": {
+      "type": "string",
+      "maxLength": 4000,
+      "pattern": "^[A-Z]{3}$",
+      "description": "ISO 4217; every Money on the invoice uses it"
+    },
+    "tax_inclusive": {
+      "type": "boolean",
+      "default": false
+    },
+    "lines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "product": {
+            "$ref": "#/$defs/Ref",
+            "x-to": [
+              "product"
+            ]
+          },
+          "price": {
+            "$ref": "#/$defs/Ref",
+            "x-to": [
+              "price"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 4000
+          },
+          "quantity": {
+            "type": "string",
+            "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+            "default": "1"
+          },
+          "unit": {
+            "type": "string",
+            "maxLength": 4000,
+            "description": "unit of measure; a UN/ECE Rec 20 code or a word"
+          },
+          "unit_price": {
+            "$ref": "#/$defs/Money"
+          },
+          "discount": {
+            "$ref": "#/$defs/Money",
+            "description": "line-level discount already deducted from amount"
+          },
+          "tax_rate": {
+            "$ref": "#/$defs/Ref",
+            "x-to": [
+              "tax_rate"
+            ]
+          },
+          "tax_amount": {
+            "$ref": "#/$defs/Money"
+          },
+          "amount": {
+            "$ref": "#/$defs/Money",
+            "description": "quantity times unit_price minus discount; includes tax only when tax_inclusive"
+          },
+          "period": {
+            "$ref": "#/$defs/Period",
+            "description": "the service period the line covers"
+          }
+        },
+        "required": [
+          "description",
+          "quantity",
+          "unit_price",
+          "amount"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "subtotal": {
+      "$ref": "#/$defs/Money",
+      "description": "the sum of lines.amount"
+    },
+    "discount_total": {
+      "$ref": "#/$defs/Money",
+      "description": "document-level discount"
+    },
+    "tax_total": {
+      "$ref": "#/$defs/Money"
+    },
+    "total": {
+      "$ref": "#/$defs/Money"
+    },
+    "amount_paid": {
+      "$ref": "#/$defs/Money",
+      "description": "maintained from applied Payments"
+    },
+    "amount_due": {
+      "$ref": "#/$defs/Money",
+      "description": "total minus amount_paid"
+    },
+    "paid_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reference": {
+      "type": "string",
+      "maxLength": 4000,
+      "description": "the buyer's PO or reference"
+    },
+    "memo": {
+      "type": "string",
+      "contentMediaType": "text/markdown",
+      "description": "a customer-facing note printed on the invoice"
+    },
+    "subscription": {
+      "$ref": "#/$defs/Ref",
+      "x-to": [
+        "subscription"
+      ]
+    },
+    "about": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Ref"
+      },
+      "description": "the Deal, the Project"
+    }
+  },
+  "required": [
+    "id",
+    "model",
+    "workspace",
+    "revision",
+    "created_at",
+    "updated_at",
+    "created_by",
+    "updated_by",
+    "direction",
+    "counterparty",
+    "status",
+    "issued_at",
+    "currency",
+    "tax_inclusive",
+    "lines",
+    "subtotal",
+    "tax_total",
+    "total",
+    "amount_paid",
+    "amount_due"
+  ],
+  "additionalProperties": false,
+  "x-model": {
+    "name": "invoice",
+    "version": 1,
+    "group": "billing",
+    "identity": [
+      [
+        "identifiers"
+      ],
+      [
+        "direction",
+        "counterparty",
+        "number"
+      ]
+    ],
+    "status_categories": [
+      "draft",
+      "open",
+      "paid",
+      "void",
+      "uncollectible"
+    ],
+    "sensitivity": {},
+    "events": [
+      {
+        "field": "status.category",
+        "to": "paid",
+        "name": "invoice.paid"
+      },
+      {
+        "field": "status.category",
+        "to": "void",
+        "name": "invoice.voided"
+      },
+      {
+        "field": "status.category",
+        "to": "uncollectible",
+        "name": "invoice.uncollectible"
+      }
+    ],
+    "agent_context": "Create with status draft; number may be empty until the invoice leaves draft, then it is required and unique per\nworkspace for receivable invoices and per counterparty for payable ones. subtotal is the sum of lines.amount,\ntotal is subtotal minus discount_total plus tax_total (tax_total excluded when tax_inclusive), amount_due is\ntotal minus amount_paid (zero on a void invoice); overdue and partially paid are queries, not statuses. The one mistake: status paid\nwithout a Payment; create the Payment, apply it, then set paid and paid_at, which emits invoice.paid."
+  },
+  "$defs": {
+    "Ref": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "Principal": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "member",
+            "person",
+            "share",
+            "system"
+          ]
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "Address": {
+      "type": "object",
+      "properties": {
+        "lines": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 4000
+          }
+        },
+        "locality": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "region": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "postal_code": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "country": {
+          "type": "string",
+          "maxLength": 4000,
+          "pattern": "^[A-Z]{2}$",
+          "description": "ISO 3166-1 alpha-2"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "billing",
+            "shipping",
+            "mailing",
+            "home",
+            "work",
+            "other"
+          ]
+        },
+        "primary": {
+          "type": "boolean"
+        },
+        "geo": {
+          "type": "object",
+          "properties": {
+            "lat": {
+              "type": "string",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+            },
+            "lon": {
+              "type": "string",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+            }
+          },
+          "required": [
+            "lat",
+            "lon"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "lines",
+        "country"
+      ],
+      "additionalProperties": false
+    },
+    "Identifier": {
+      "type": "object",
+      "properties": {
+        "system": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "primary": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "system",
+        "value"
+      ],
+      "additionalProperties": false,
+      "description": "An external or natural key. `system` is a registered scheme (email, domain, vat:eu, sha256, stripe:customer, postware:workspace)."
+    },
+    "Money": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+        },
+        "currency": {
+          "type": "string",
+          "maxLength": 4000,
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217"
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "additionalProperties": false
+    },
+    "Period": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "start"
+      ],
+      "additionalProperties": false
+    },
+    "Status": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "state": {
+          "type": "string",
+          "maxLength": 4000
+        }
+      },
+      "required": [
+        "category"
+      ],
+      "additionalProperties": false,
+      "description": "category is the standard (validated per model); state is the workspace's own label."
+    }
+  }
+}

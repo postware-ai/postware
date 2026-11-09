@@ -1,0 +1,22 @@
+urn: urn:postware:core:project
+name: project
+title: Project
+version: 1
+group: core
+description: "A container of work with a lifecycle: planned, active, paused, done or cancelled. Tasks belong to it."
+agent_context: |
+  Project is the container Tasks belong to; link it to what it is for through about (the client Organization, the
+  Deal). Dedupe by identifier only, so check for an existing Project by name before creating one. archived_at
+  hides it from default views and is independent of status. The one mistake: marking a Project done while Tasks
+  in it are still open.
+identity:
+  - [identifiers]
+status:
+  categories: [planned, active, paused, done, cancelled]
+fields:
+  name:        { type: string, required: true }
+  description: { type: text }
+  status:      { type: Status, required: true, default: { category: active } }
+  members:     { type: ref, to: [member], list: true }
+  archived_at: { type: datetime, description: "hidden from default views; independent of status" }
+  about:       { type: ref, to: any, list: true, description: "the client, the deal" }

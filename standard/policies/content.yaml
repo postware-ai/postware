@@ -1,0 +1,34 @@
+# Default policies of the content pack. See policies/core.yaml for the shape and the rules.
+#
+# The public reads Documents whose status category is `published`, whose published_at has passed (a
+# future published_at schedules publication; no scheduler job is needed), and whose Collection is
+# public. This is the default public share of docs/spec/04-policy-share.md section 4: publishing is a
+# public read, served at /p/{ws}/document with cache headers. "collection in {model: collection,
+# where: ...}" is the Scope operand of section 5 applied to a single reference.
+#
+# Source: docs/spec/04-policy-share.md section 4 (content); research/models/content_system.md section 3.
+
+- name: public reads published documents in public collections
+  principal: { kind: public }
+  applies_to: document
+  actions: [read]
+  where:
+    and:
+      - { "status.category": published }
+      - { published_at: { lte: "@now" } }
+      - collection:
+          in: { model: collection, where: { public: true } }
+  fields: null
+  enabled: true
+  origin: pack
+
+# The Collection a published Document belongs to is readable too, so /p/{ws}/document?include=collection
+# returns it in `included` (the site renders the collection name next to the document).
+- name: public reads public collections
+  principal: { kind: public }
+  applies_to: collection
+  actions: [read]
+  where: { public: true }
+  fields: null
+  enabled: true
+  origin: pack

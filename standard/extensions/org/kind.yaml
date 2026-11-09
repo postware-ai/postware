@@ -1,0 +1,11 @@
+# Published extension declarations for Teams: hierarchy and typing that only some tools have. URN
+# urn:postware:ext:org:<name>; stored at ext.org.<name>. parent and lead hold record ids as strings because
+# extension declarations carry no reference type.
+
+- model: team
+  namespace: org
+  name: kind
+  type: enum
+  description: "What kind of group this is in the organization chart."
+  enum: [team, department, cost_center, business_unit, group]
+  index: false

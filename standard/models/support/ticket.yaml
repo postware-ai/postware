@@ -1,0 +1,31 @@
+urn: urn:postware:support:ticket
+name: ticket
+title: Ticket
+version: 1
+group: support
+description: "A request for help from a Person, owned by the team until it is solved. The conversation is Messages about it; internal notes are Notes about it."
+agent_context: |
+  Ticket is the request; what was said is Messages with about [ticket], and what the team thinks is Notes about it.
+  Assignment and status changes are the audit log, not records. The requester is a Person, often an end user of the
+  product. Dedupe by the source system's id in identifiers, so search open Tickets from the same requester before
+  creating one. The one mistake: solved without a Message to the requester; solved emits ticket.solved.
+identity:
+  - [identifiers]
+status:
+  categories: [new, open, pending, on_hold, solved, closed]
+fields:
+  subject:      { type: string, required: true }
+  description:  { type: text, description: "the request as written; importers copy the first inbound message when the source has no description" }
+  requester:    { type: ref, to: [person], required: true, description: often the product's own end user }
+  organization: { type: ref, to: [organization] }
+  assignee:     { type: ref, to: [member] }
+  team:         { type: ref, to: [team] }
+  status:       { type: Status, required: true, default: { category: new } }
+  priority:     { type: enum, values: [urgent, high, normal, low] }
+  channel:      { type: enum, values: [email, chat, sms, phone, web, social, api, other] }
+  due_at:       { type: datetime }
+  resolved_at:  { type: datetime, description: first time status became solved or closed }
+  about:        { type: ref, to: any, list: true }
+events:
+  - { field: status.category, to: solved, name: ticket.solved }
+  - { field: status.category, to: closed, name: ticket.closed }

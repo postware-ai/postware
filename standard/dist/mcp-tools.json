@@ -1,0 +1,776 @@
+[
+  {
+    "name": "schema_describe",
+    "title": "Describe the schema",
+    "description": "Describe the data model. Without `model`: every model with name, title, group, a one-line description and the record count. With one: its fields with types and descriptions, identity rules, status categories, declared extensions, agent context, an example record, the JSON Schema and the policies that apply to you. Read this before the first write to a model: identity rules decide what counts as a duplicate.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string",
+          "description": "model name",
+          "enum": [
+            "identity",
+            "import_run",
+            "member",
+            "policy",
+            "share",
+            "tag",
+            "workspace",
+            "event",
+            "file",
+            "message",
+            "note",
+            "organization",
+            "person",
+            "product",
+            "project",
+            "task",
+            "team",
+            "deal",
+            "pipeline",
+            "invoice",
+            "payment",
+            "price",
+            "subscription",
+            "tax_rate",
+            "ticket",
+            "collection",
+            "document"
+          ]
+        },
+        "detail": {
+          "type": "string",
+          "enum": [
+            "summary",
+            "full"
+          ],
+          "default": "full",
+          "description": "`summary` omits the JSON Schema and the example record; default `full`"
+        }
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "record_query",
+    "title": "Query records",
+    "description": "Query records of one model with the query grammar: `where` (paths to values or operators, and/or/not), `order`, `limit`, `cursor`, `include` (ref fields resolved into `included`), `fields`, `search`. Returns {data, included, next_cursor}. Pass `next_cursor` back as `cursor` to page; never assume a list is complete while next_cursor is set.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string",
+          "enum": [
+            "identity",
+            "import_run",
+            "member",
+            "policy",
+            "share",
+            "tag",
+            "workspace",
+            "event",
+            "file",
+            "message",
+            "note",
+            "organization",
+            "person",
+            "product",
+            "project",
+            "task",
+            "team",
+            "deal",
+            "pipeline",
+            "invoice",
+            "payment",
+            "price",
+            "subscription",
+            "tax_rate",
+            "ticket",
+            "collection",
+            "document"
+          ],
+          "description": "the model to query"
+        },
+        "where": {
+          "type": "object",
+          "description": "condition object: field paths to values or {op: value}; and/or/not; operators eq ne lt lte gt gte in nin contains starts_with ends_with is_null exists any all none between",
+          "additionalProperties": true
+        },
+        "order": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "paths, - prefix for descending; default [\"-updated_at\"]"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500,
+          "default": 50
+        },
+        "cursor": {
+          "type": "string",
+          "description": "next_cursor of the previous page"
+        },
+        "include": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "ref fields to include, depth 1"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "top-level fields to return"
+        },
+        "search": {
+          "type": "string",
+          "description": "full-text search, prefix matching, ANDed with where"
+        },
+        "include_deleted": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": [
+        "model"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "record_get",
+    "title": "Get a record",
+    "description": "Read one record by id, optionally including referenced records (depth 1). Returns the full record with its revision. Keep the revision: updates need it as if_match.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string",
+          "description": "model name",
+          "enum": [
+            "identity",
+            "import_run",
+            "member",
+            "policy",
+            "share",
+            "tag",
+            "workspace",
+            "event",
+            "file",
+            "message",
+            "note",
+            "organization",
+            "person",
+            "product",
+            "project",
+            "task",
+            "team",
+            "deal",
+            "pipeline",
+            "invoice",
+            "payment",
+            "price",
+            "subscription",
+            "tax_rate",
+            "ticket",
+            "collection",
+            "document"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "description": "record id (ULID)"
+        },
+        "include": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "ref fields to include"
+        }
+      },
+      "required": [
+        "model",
+        "id"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "record_create",
+    "title": "Create a record",
+    "description": "Create a record. `data` holds the model's fields plus optional identifiers, tags (slugs), ext and owner. Fails with `duplicate` when an identity rule matches an existing record: use record_upsert when the record may already exist.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string",
+          "description": "model name",
+          "enum": [
+            "identity",
+            "import_run",
+            "member",
+            "policy",
+            "share",
+            "tag",
+            "workspace",
+            "event",
+            "file",
+            "message",
+            "note",
+            "organization",
+            "person",
+            "product",
+            "project",
+            "task",
+            "team",
+            "deal",
+            "pipeline",
+            "invoice",
+            "payment",
+            "price",
+            "subscription",
+            "tax_rate",
+            "ticket",
+            "collection",
+            "document"
+          ]
+        },
+        "data": {
+          "type": "object",
+          "description": "the record's fields"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "description": "repeatable key; the same key returns the first result for 24 hours"
+        }
+      },
+      "required": [
+        "model",
+        "data"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    }
+  },
+  {
+    "name": "record_update",
+    "title": "Update a record",
+    "description": "Update fields of a record. Arrays and nested objects are replaced whole; ext keys merge; tags are replaced whole. Pass `if_match` from the record you read; a `conflict` means someone changed it, read again.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string",
+          "description": "model name",
+          "enum": [
+            "identity",
+            "import_run",
+            "member",
+            "policy",
+            "share",
+            "tag",
+            "workspace",
+            "event",
+            "file",
+            "message",
+            "note",
+            "organization",
+            "person",
+            "product",
+            "project",
+            "task",
+            "team",
+            "deal",
+            "pipeline",
+            "invoice",
+            "payment",
+            "price",
+            "subscription",
+            "tax_rate",
+            "ticket",
+            "collection",
+            "document"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "description": "record id"
+        },
+        "data": {
+          "type": "object",
+          "description": "the fields to change"
+        },
+        "if_match": {
+          "type": "integer",
+          "description": "the revision you read"
+        }
+      },
+      "required": [
+        "model",
+        "id",
+        "data"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    }
+  },
+  {
+    "name": "record_upsert",
+    "title": "Upsert a record",
+    "description": "Create or update a record by its identity rules (default) or by explicit identifiers (`match: {identifiers: [{system, value}]}`). Returns the record and `created`. Use this for imports and syncs; identifiers are unioned, other arrays replaced whole.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string",
+          "description": "model name",
+          "enum": [
+            "identity",
+            "import_run",
+            "member",
+            "policy",
+            "share",
+            "tag",
+            "workspace",
+            "event",
+            "file",
+            "message",
+            "note",
+            "organization",
+            "person",
+            "product",
+            "project",
+            "task",
+            "team",
+            "deal",
+            "pipeline",
+            "invoice",
+            "payment",
+            "price",
+            "subscription",
+            "tax_rate",
+            "ticket",
+            "collection",
+            "document"
+          ]
+        },
+        "data": {
+          "type": "object"
+        },
+        "match": {
+          "description": "\"identity\" or {identifiers: [{system, value}]}"
+        }
+      },
+      "required": [
+        "model",
+        "data"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    }
+  },
+  {
+    "name": "record_delete",
+    "title": "Delete a record",
+    "description": "Soft-delete a record: `deleted_at` is set and it leaves lists, gets and search (record_query with `include_deleted: true` still returns it). References to it in other records are kept. Returns {deleted: true}. There is no restore and no hard delete through this tool: a hard delete is `DELETE /v1/{model}/{id}?hard=true` (admins only; `a delete --hard` from the CLI). Delete only on an explicit instruction.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string",
+          "description": "model name",
+          "enum": [
+            "identity",
+            "import_run",
+            "member",
+            "policy",
+            "share",
+            "tag",
+            "workspace",
+            "event",
+            "file",
+            "message",
+            "note",
+            "organization",
+            "person",
+            "product",
+            "project",
+            "task",
+            "team",
+            "deal",
+            "pipeline",
+            "invoice",
+            "payment",
+            "price",
+            "subscription",
+            "tax_rate",
+            "ticket",
+            "collection",
+            "document"
+          ]
+        },
+        "id": {
+          "type": "string",
+          "description": "record id"
+        }
+      },
+      "required": [
+        "model",
+        "id"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    }
+  },
+  {
+    "name": "record_batch",
+    "title": "Batch operations",
+    "description": "Run up to 500 operations (create, update, upsert, delete) in one call. `atomic` (default true) rolls everything back on any failure; `dry_run` validates and evaluates policies without writing. Use dry_run first for large imports.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "operations": {
+          "type": "array",
+          "maxItems": 500,
+          "items": {
+            "type": "object",
+            "properties": {
+              "op": {
+                "type": "string",
+                "enum": [
+                  "create",
+                  "update",
+                  "upsert",
+                  "delete"
+                ]
+              },
+              "model": {
+                "type": "string",
+                "description": "model name",
+                "enum": [
+                  "identity",
+                  "import_run",
+                  "member",
+                  "policy",
+                  "share",
+                  "tag",
+                  "workspace",
+                  "event",
+                  "file",
+                  "message",
+                  "note",
+                  "organization",
+                  "person",
+                  "product",
+                  "project",
+                  "task",
+                  "team",
+                  "deal",
+                  "pipeline",
+                  "invoice",
+                  "payment",
+                  "price",
+                  "subscription",
+                  "tax_rate",
+                  "ticket",
+                  "collection",
+                  "document"
+                ]
+              },
+              "id": {
+                "type": "string",
+                "description": "record id for update and delete"
+              },
+              "if_match": {
+                "type": "integer"
+              },
+              "data": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "op",
+              "model"
+            ]
+          }
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": false
+        },
+        "atomic": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "required": [
+        "operations"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    }
+  },
+  {
+    "name": "record_search",
+    "title": "Search records",
+    "description": "Full-text search across models (prefix matching, relevance order). Returns hits with a snippet and the record. Use record_query with `where` when you know the field; search is for text you only half remember.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "search": {
+          "type": "string",
+          "description": "the text to search for"
+        },
+        "models": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "model name",
+            "enum": [
+              "identity",
+              "import_run",
+              "member",
+              "policy",
+              "share",
+              "tag",
+              "workspace",
+              "event",
+              "file",
+              "message",
+              "note",
+              "organization",
+              "person",
+              "product",
+              "project",
+              "task",
+              "team",
+              "deal",
+              "pipeline",
+              "invoice",
+              "payment",
+              "price",
+              "subscription",
+              "tax_rate",
+              "ticket",
+              "collection",
+              "document"
+            ]
+          },
+          "description": "restrict to these models"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 20,
+          "maximum": 500
+        }
+      },
+      "required": [
+        "search"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  },
+  {
+    "name": "import_run",
+    "title": "Run a CSV import",
+    "description": "Import a CSV file (uploaded first as a File record) into one model with a column mapping: {columns: {\"Email\": \"emails[0].value\", \"Company\": \"affiliations[0].organization@organization.name\"}, constants: {tags: [\"imported\"]}, identity: \"identity\"}. Returns the ImportRun with counts and errors. Always run with dry_run true first and read the errors.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": [
+            "csv"
+          ]
+        },
+        "model": {
+          "type": "string",
+          "description": "model name",
+          "enum": [
+            "identity",
+            "import_run",
+            "member",
+            "policy",
+            "share",
+            "tag",
+            "workspace",
+            "event",
+            "file",
+            "message",
+            "note",
+            "organization",
+            "person",
+            "product",
+            "project",
+            "task",
+            "team",
+            "deal",
+            "pipeline",
+            "invoice",
+            "payment",
+            "price",
+            "subscription",
+            "tax_rate",
+            "ticket",
+            "collection",
+            "document"
+          ]
+        },
+        "file_id": {
+          "type": "string",
+          "description": "the uploaded File record id"
+        },
+        "mapping": {
+          "type": "object",
+          "properties": {
+            "columns": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            },
+            "constants": {
+              "type": "object"
+            },
+            "identity": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "columns"
+          ]
+        },
+        "dry_run": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "required": [
+        "source",
+        "model",
+        "file_id",
+        "mapping"
+      ]
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    }
+  },
+  {
+    "name": "export_run",
+    "title": "Export the workspace",
+    "description": "Export the workspace as the SQLite file (the whole workspace, credentials stripped), or one or more models as CSV or JSON Lines (zipped when several). Starts a job and returns it; poll `GET /v1/exports/{id}` or call this tool again with `job_id` until `state` is `succeeded` (then `download_url` is set) or `failed`. The link expires (`download_expires_at`); hand it to the user promptly.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": [
+            "sqlite",
+            "csv",
+            "jsonl"
+          ],
+          "default": "sqlite"
+        },
+        "models": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "description": "model name",
+            "enum": [
+              "identity",
+              "import_run",
+              "member",
+              "policy",
+              "share",
+              "tag",
+              "workspace",
+              "event",
+              "file",
+              "message",
+              "note",
+              "organization",
+              "person",
+              "product",
+              "project",
+              "task",
+              "team",
+              "deal",
+              "pipeline",
+              "invoice",
+              "payment",
+              "price",
+              "subscription",
+              "tax_rate",
+              "ticket",
+              "collection",
+              "document"
+            ]
+          },
+          "description": "models to export; [\"*\"] or empty for all"
+        },
+        "job_id": {
+          "type": "string",
+          "description": "poll an export started earlier; the other arguments are ignored"
+        }
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    }
+  }
+]

@@ -1,0 +1,27 @@
+urn: urn:postware:system:policy
+name: policy
+title: Policy
+version: 1
+group: system
+description: "A rule: which principals may do which actions on which model, narrowed by a filter in the query grammar. Packs ship defaults, admins edit them, Shares compile into them."
+agent_context: |
+  Policies are ANDed into every read and write by end users, guests and the public; members are governed by roles
+  and never consult them. Only admins write Policies. Dedupe by name. The one mistake: a `where` written against
+  fields the model in applies_to does not have; run it as a query first.
+identity:
+  - [name]
+fields:
+  name:       { type: string, required: true }
+  principal:
+    type: object
+    required: true
+    description: the class of caller the policy applies to
+    fields:
+      kind:  { type: enum, values: [role, end_user, share, public], required: true }
+      value: { type: string, description: "the role name for role, the share id for share" }
+  applies_to: { type: string, required: true, description: "a model name, or * for every model" }
+  actions:    { type: enum, values: [read, create, update, delete], list: true, required: true }
+  where:      { type: object, description: "a where object of the query grammar; variables @principal.person, @principal.member, @principal.identity, @principal.affiliated_organizations, @share.id, @now" }
+  fields:     { type: string, list: true, description: field allow-list for read or update }
+  enabled:    { type: bool, required: true, default: true }
+  origin:     { type: enum, values: [pack, workspace, share], required: true, default: workspace, description: who created it }

@@ -1,0 +1,21 @@
+urn: urn:postware:system:tag
+name: tag
+title: Tag
+version: 1
+group: system
+description: "A label that works the same on every record: a namespaced slug with a display name, a colour and a description. The envelope's tags[] holds slugs that resolve to Tag records."
+agent_context: |
+  Tags classify; they never carry meaning the standard depends on (that is a field or a Status). Write slugs in
+  tags[] on any record and missing workspace tags are created for you; create a Tag record only to set a colour or
+  a description. A slug is [namespace:]segment(/segment)*, each segment [a-z0-9][a-z0-9_-]{0,63}, at most 255
+  characters, compared case-insensitively; name is the display form. Dedupe by (namespace, slug). The one mistake:
+  writing into a reserved namespace (sys, a pack name, a source name); those belong to the server, packs and importers.
+identity:
+  - [namespace, slug]
+fields:
+  name:        { type: string, required: true, description: "the display form; may carry case and spaces" }
+  slug:        { type: string, required: true, index: true, max: 255, pattern: "^[a-z0-9][a-z0-9_-]{0,63}(?:/[a-z0-9][a-z0-9_-]{0,63})*$", description: "lowercase segments joined by /" }
+  namespace:   { type: string, pattern: "^[a-z][a-z0-9-]{0,31}$", description: "none = workspace-local; sys, a pack name and a source name are reserved" }
+  color:       { type: string, pattern: "^#[0-9a-fA-F]{6}$", description: "#RRGGBB" }
+  description: { type: string }
+  applies_to:  { type: string, list: true, description: "model names this tag is meant for; absent means any" }

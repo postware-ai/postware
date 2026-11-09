@@ -1,0 +1,31 @@
+urn: urn:postware:content:document
+name: document
+title: Document
+version: 1
+group: content
+description: "One piece of content in a Collection: a page, a post, a docs article, a changelog entry or a help article, in Markdown, with a status from draft to published, authors, SEO metadata and an optional parent for hierarchies."
+agent_context: |
+  Document is Markdown content with a workflow; publishing is status.category published inside a public Collection,
+  which emits document.published. A future published_at schedules: the public reads it only once that time has
+  passed. Dedupe by slug within the collection and locale. The one mistake: changing the slug of a published
+  Document; the slug is its URL.
+identity:
+  - [collection, slug, locale]
+status:
+  categories: [draft, review, published, archived]
+fields:
+  collection:   { type: ref, to: [collection], required: true }
+  title:        { type: string, required: true }
+  slug:         { type: string, required: true, index: true, pattern: "^[a-z0-9]+(-[a-z0-9]+)*$" }
+  body:         { type: text, description: "Markdown; a source's native rich text stays in source.payload" }
+  summary:      { type: text }
+  status:       { type: Status, required: true, default: { category: draft } }
+  published_at: { type: datetime, index: true, description: "set by the server on the first transition to published when absent; a future value schedules" }
+  authors:      { type: ref, to: [member, person], list: true, required: true, description: at least one }
+  cover:        { type: ref, to: [file] }
+  seo:          { type: SEO }
+  locale:       { type: string, description: BCP 47 }
+  parent:       { type: ref, to: [document], description: docs hierarchy }
+  order:        { type: int }
+events:
+  - { field: status.category, to: published, name: document.published }

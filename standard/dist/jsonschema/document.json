@@ -1,0 +1,300 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:postware:content:document",
+  "title": "Document",
+  "description": "One piece of content in a Collection: a page, a post, a docs article, a changelog entry or a help article, in Markdown, with a status from draft to published, authors, SEO metadata and an optional parent for hierarchies.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "ULID; generated when absent"
+    },
+    "model": {
+      "type": "string",
+      "description": "name@version",
+      "readOnly": true
+    },
+    "workspace": {
+      "type": "string",
+      "description": "the Workspace record id",
+      "readOnly": true
+    },
+    "revision": {
+      "type": "integer",
+      "description": "optimistic concurrency with If-Match",
+      "readOnly": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "created_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind: member|person|share|system, id}",
+      "readOnly": true
+    },
+    "updated_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind, id}",
+      "readOnly": true
+    },
+    "owner": {
+      "type": "string",
+      "description": "Member id, the accountable operator"
+    },
+    "identifiers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "description": "Identifier[]: the crosswalk"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^([a-z0-9][a-z0-9_-]{0,63}:)?[a-z0-9][a-z0-9_-]{0,63}(/[a-z0-9][a-z0-9_-]{0,63})*$"
+      },
+      "description": "tag slugs, `namespace:slug` form"
+    },
+    "ext": {
+      "type": "object",
+      "description": "declared extensions only"
+    },
+    "source": {
+      "type": "object",
+      "description": "{system, external_id, created_at, updated_at, deleted_at?, import_run, imported_at, payload}"
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "soft delete",
+      "readOnly": true
+    },
+    "collection": {
+      "$ref": "#/$defs/Ref",
+      "x-to": [
+        "collection"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "slug": {
+      "type": "string",
+      "maxLength": 4000,
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "body": {
+      "type": "string",
+      "contentMediaType": "text/markdown",
+      "description": "Markdown; a source's native rich text stays in source.payload"
+    },
+    "summary": {
+      "type": "string",
+      "contentMediaType": "text/markdown"
+    },
+    "status": {
+      "$ref": "#/$defs/Status",
+      "x-categories": [
+        "draft",
+        "review",
+        "published",
+        "archived"
+      ],
+      "default": {
+        "category": "draft"
+      }
+    },
+    "published_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "set by the server on the first transition to published when absent; a future value schedules"
+    },
+    "authors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Ref",
+        "x-to": [
+          "member",
+          "person"
+        ]
+      },
+      "description": "at least one"
+    },
+    "cover": {
+      "$ref": "#/$defs/Ref",
+      "x-to": [
+        "file"
+      ]
+    },
+    "seo": {
+      "$ref": "#/$defs/SEO"
+    },
+    "locale": {
+      "type": "string",
+      "maxLength": 4000,
+      "description": "BCP 47"
+    },
+    "parent": {
+      "$ref": "#/$defs/Ref",
+      "x-to": [
+        "document"
+      ],
+      "description": "docs hierarchy"
+    },
+    "order": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "id",
+    "model",
+    "workspace",
+    "revision",
+    "created_at",
+    "updated_at",
+    "created_by",
+    "updated_by",
+    "collection",
+    "title",
+    "slug",
+    "status",
+    "authors"
+  ],
+  "additionalProperties": false,
+  "x-model": {
+    "name": "document",
+    "version": 1,
+    "group": "content",
+    "identity": [
+      [
+        "collection",
+        "slug",
+        "locale"
+      ]
+    ],
+    "status_categories": [
+      "draft",
+      "review",
+      "published",
+      "archived"
+    ],
+    "sensitivity": {},
+    "events": [
+      {
+        "field": "status.category",
+        "to": "published",
+        "name": "document.published"
+      }
+    ],
+    "agent_context": "Document is Markdown content with a workflow; publishing is status.category published inside a public Collection,\nwhich emits document.published. A future published_at schedules: the public reads it only once that time has\npassed. Dedupe by slug within the collection and locale. The one mistake: changing the slug of a published\nDocument; the slug is its URL."
+  },
+  "$defs": {
+    "Ref": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "Principal": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "member",
+            "person",
+            "share",
+            "system"
+          ]
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "Identifier": {
+      "type": "object",
+      "properties": {
+        "system": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "primary": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "system",
+        "value"
+      ],
+      "additionalProperties": false,
+      "description": "An external or natural key. `system` is a registered scheme (email, domain, vat:eu, sha256, stripe:customer, postware:workspace)."
+    },
+    "SEO": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "canonical_url": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "no_index": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Status": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "state": {
+          "type": "string",
+          "maxLength": 4000
+        }
+      },
+      "required": [
+        "category"
+      ],
+      "additionalProperties": false,
+      "description": "category is the standard (validated per model); state is the workspace's own label."
+    }
+  }
+}

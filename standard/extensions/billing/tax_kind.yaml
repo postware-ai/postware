@@ -1,0 +1,11 @@
+# Published extension declarations of the billing pack: attributes that only some billing or accounting systems
+# carry, or that need a usage, tax or e-invoicing profile to mean anything. URN urn:postware:ext:billing:<name>;
+# stored at ext.billing.<name>.
+
+- model: tax_rate
+  namespace: billing
+  name: tax_kind
+  type: enum
+  description: "The kind of tax the rate is: VAT, GST, a sales tax, or another."
+  enum: [vat, gst, sales_tax, other]
+  index: false

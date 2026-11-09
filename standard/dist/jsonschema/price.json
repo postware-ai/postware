@@ -1,0 +1,235 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:postware:billing:price",
+  "title": "Price",
+  "description": "An amount at which a Product is sold, once or on a recurring interval. Subscription items and Invoice lines point at Prices.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "ULID; generated when absent"
+    },
+    "model": {
+      "type": "string",
+      "description": "name@version",
+      "readOnly": true
+    },
+    "workspace": {
+      "type": "string",
+      "description": "the Workspace record id",
+      "readOnly": true
+    },
+    "revision": {
+      "type": "integer",
+      "description": "optimistic concurrency with If-Match",
+      "readOnly": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "created_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind: member|person|share|system, id}",
+      "readOnly": true
+    },
+    "updated_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind, id}",
+      "readOnly": true
+    },
+    "owner": {
+      "type": "string",
+      "description": "Member id, the accountable operator"
+    },
+    "identifiers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "description": "Identifier[]: the crosswalk"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^([a-z0-9][a-z0-9_-]{0,63}:)?[a-z0-9][a-z0-9_-]{0,63}(/[a-z0-9][a-z0-9_-]{0,63})*$"
+      },
+      "description": "tag slugs, `namespace:slug` form"
+    },
+    "ext": {
+      "type": "object",
+      "description": "declared extensions only"
+    },
+    "source": {
+      "type": "object",
+      "description": "{system, external_id, created_at, updated_at, deleted_at?, import_run, imported_at, payload}"
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "soft delete",
+      "readOnly": true
+    },
+    "product": {
+      "$ref": "#/$defs/Ref",
+      "x-to": [
+        "product"
+      ]
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 4000,
+      "description": "a short label: Monthly, Annual, 2 seats"
+    },
+    "amount": {
+      "$ref": "#/$defs/Money",
+      "description": "per unit, per interval; tax per tax_inclusive"
+    },
+    "interval": {
+      "type": "string",
+      "enum": [
+        "one_time",
+        "day",
+        "week",
+        "month",
+        "year"
+      ],
+      "default": "one_time"
+    },
+    "interval_count": {
+      "type": "integer",
+      "description": "intervals between charges; 3 with month bills quarterly",
+      "default": 1
+    },
+    "tax_inclusive": {
+      "type": "boolean",
+      "default": false
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "id",
+    "model",
+    "workspace",
+    "revision",
+    "created_at",
+    "updated_at",
+    "created_by",
+    "updated_by",
+    "product",
+    "amount",
+    "interval",
+    "tax_inclusive",
+    "active"
+  ],
+  "additionalProperties": false,
+  "x-model": {
+    "name": "price",
+    "version": 1,
+    "group": "billing",
+    "identity": [
+      [
+        "identifiers"
+      ],
+      [
+        "product",
+        "name"
+      ]
+    ],
+    "status_categories": [],
+    "sensitivity": {},
+    "events": null,
+    "agent_context": "interval one_time is a one-off price; any other interval with interval_count makes it recurring (month with\ninterval_count 3 bills quarterly). Metered usage, tiers and trials are ext.billing.*. Dedupe by an identifier\n(the billing provider's price id) or by (product, name). The one mistake: changing the amount of a Price that\nSubscriptions use; create a new Price and set active false on the old one."
+  },
+  "$defs": {
+    "Ref": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "Principal": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "member",
+            "person",
+            "share",
+            "system"
+          ]
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "Identifier": {
+      "type": "object",
+      "properties": {
+        "system": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "primary": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "system",
+        "value"
+      ],
+      "additionalProperties": false,
+      "description": "An external or natural key. `system` is a registered scheme (email, domain, vat:eu, sha256, stripe:customer, postware:workspace)."
+    },
+    "Money": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "string",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$"
+        },
+        "currency": {
+          "type": "string",
+          "maxLength": 4000,
+          "pattern": "^[A-Z]{3}$",
+          "description": "ISO 4217"
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

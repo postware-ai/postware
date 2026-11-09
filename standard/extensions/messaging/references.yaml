@@ -1,0 +1,9 @@
+# Published extension declarations for Messages imported from mail systems. URN urn:postware:ext:messaging:<name>;
+# stored at ext.messaging.<name>.
+
+- model: message
+  namespace: messaging
+  name: references
+  type: string
+  description: "The RFC 5322 References header as written: the Message-IDs of the thread's ancestors, space-separated, for rebuilding threads of imported mail."
+  index: false

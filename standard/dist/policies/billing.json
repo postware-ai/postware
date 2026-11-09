@@ -1,0 +1,80 @@
+[
+  {
+    "actions": [
+      "read"
+    ],
+    "applies_to": "invoice",
+    "enabled": true,
+    "fields": null,
+    "name": "end user reads own invoices",
+    "origin": "pack",
+    "principal": {
+      "kind": "end_user"
+    },
+    "where": {
+      "or": [
+        {
+          "counterparty": "@principal.person"
+        },
+        {
+          "counterparty": {
+            "in": "@principal.affiliated_organizations"
+          },
+          "counterparty.model": "organization"
+        }
+      ]
+    }
+  },
+  {
+    "actions": [
+      "read"
+    ],
+    "applies_to": "subscription",
+    "enabled": true,
+    "fields": null,
+    "name": "end user reads own subscriptions",
+    "origin": "pack",
+    "principal": {
+      "kind": "end_user"
+    },
+    "where": {
+      "or": [
+        {
+          "counterparty": "@principal.person"
+        },
+        {
+          "counterparty": {
+            "in": "@principal.affiliated_organizations"
+          },
+          "counterparty.model": "organization"
+        }
+      ]
+    }
+  },
+  {
+    "actions": [
+      "read"
+    ],
+    "applies_to": "payment",
+    "enabled": true,
+    "fields": null,
+    "name": "end user reads own payments",
+    "origin": "pack",
+    "principal": {
+      "kind": "end_user"
+    },
+    "where": {
+      "or": [
+        {
+          "counterparty": "@principal.person"
+        },
+        {
+          "counterparty": {
+            "in": "@principal.affiliated_organizations"
+          },
+          "counterparty.model": "organization"
+        }
+      ]
+    }
+  }
+]

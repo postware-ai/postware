@@ -1,0 +1,3418 @@
+{
+  "version": "0.1.0",
+  "types": [
+    {
+      "name": "Identifier",
+      "description": "An external or natural key. `system` is a registered scheme (email, domain, vat:eu, sha256, stripe:customer, postware:workspace).",
+      "fields": [
+        {
+          "name": "system",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "primary",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "Name",
+      "description": "A human name (vCard, FHIR HumanName).",
+      "fields": [
+        {
+          "name": "full",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "given",
+          "type": "string"
+        },
+        {
+          "name": "family",
+          "type": "string"
+        },
+        {
+          "name": "middle",
+          "type": "string"
+        },
+        {
+          "name": "prefix",
+          "type": "string"
+        },
+        {
+          "name": "suffix",
+          "type": "string"
+        },
+        {
+          "name": "nickname",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "ContactPoint",
+      "description": "One email, phone or URL; used by the emails[], phones[] and urls[] arrays.",
+      "fields": [
+        {
+          "name": "value",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "label",
+          "type": "enum",
+          "values": [
+            "work",
+            "home",
+            "mobile",
+            "fax",
+            "billing",
+            "other"
+          ]
+        },
+        {
+          "name": "primary",
+          "type": "bool"
+        },
+        {
+          "name": "verified_at",
+          "type": "datetime"
+        }
+      ]
+    },
+    {
+      "name": "Address",
+      "fields": [
+        {
+          "name": "lines",
+          "type": "string",
+          "list": true,
+          "required": true
+        },
+        {
+          "name": "locality",
+          "type": "string"
+        },
+        {
+          "name": "region",
+          "type": "string"
+        },
+        {
+          "name": "postal_code",
+          "type": "string"
+        },
+        {
+          "name": "country",
+          "type": "string",
+          "required": true,
+          "description": "ISO 3166-1 alpha-2",
+          "pattern": "^[A-Z]{2}$"
+        },
+        {
+          "name": "kind",
+          "type": "enum",
+          "values": [
+            "billing",
+            "shipping",
+            "mailing",
+            "home",
+            "work",
+            "other"
+          ]
+        },
+        {
+          "name": "primary",
+          "type": "bool"
+        },
+        {
+          "name": "geo",
+          "type": "object",
+          "fields": [
+            {
+              "name": "lat",
+              "type": "decimal",
+              "required": true
+            },
+            {
+              "name": "lon",
+              "type": "decimal",
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Money",
+      "fields": [
+        {
+          "name": "amount",
+          "type": "decimal",
+          "required": true
+        },
+        {
+          "name": "currency",
+          "type": "string",
+          "required": true,
+          "description": "ISO 4217",
+          "pattern": "^[A-Z]{3}$"
+        }
+      ]
+    },
+    {
+      "name": "Period",
+      "fields": [
+        {
+          "name": "start",
+          "type": "datetime",
+          "required": true
+        },
+        {
+          "name": "end",
+          "type": "datetime"
+        }
+      ]
+    },
+    {
+      "name": "Status",
+      "description": "category is the standard (validated per model); state is the workspace's own label.",
+      "fields": [
+        {
+          "name": "category",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "state",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "Affiliation",
+      "description": "A person's membership of an organization; the job title lives on the Person.",
+      "fields": [
+        {
+          "name": "organization",
+          "type": "ref",
+          "required": true,
+          "to": [
+            "organization"
+          ]
+        },
+        {
+          "name": "role",
+          "type": "enum",
+          "values": [
+            "employee",
+            "contractor",
+            "owner",
+            "contact",
+            "member",
+            "other"
+          ]
+        },
+        {
+          "name": "primary",
+          "type": "bool"
+        },
+        {
+          "name": "period",
+          "type": "Period"
+        }
+      ]
+    },
+    {
+      "name": "Recurrence",
+      "fields": [
+        {
+          "name": "rrule",
+          "type": "string",
+          "required": true,
+          "description": "RFC 5545 RRULE"
+        }
+      ]
+    },
+    {
+      "name": "Scope",
+      "fields": [
+        {
+          "name": "model",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "ids",
+          "type": "string",
+          "list": true
+        },
+        {
+          "name": "where",
+          "type": "object",
+          "description": "a query grammar `where` object"
+        }
+      ]
+    },
+    {
+      "name": "Grantee",
+      "fields": [
+        {
+          "name": "kind",
+          "type": "enum",
+          "required": true,
+          "values": [
+            "link",
+            "email",
+            "workspace",
+            "public"
+          ]
+        },
+        {
+          "name": "value",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "SEO",
+      "fields": [
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "canonical_url",
+          "type": "string"
+        },
+        {
+          "name": "no_index",
+          "type": "bool"
+        }
+      ]
+    },
+    {
+      "name": "Participant",
+      "description": "A person or address taking part in a message or an event (an RFC 5322 mailbox, a JMAP EmailAddress, an iCalendar ATTENDEE or ORGANIZER). Every field is optional; ref names the Person or Member when one is known, address carries the email, phone number or handle as the channel wrote it.",
+      "fields": [
+        {
+          "name": "ref",
+          "type": "ref",
+          "to": [
+            "person",
+            "member"
+          ]
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "address",
+          "type": "string",
+          "description": "email address, phone number or handle, as the channel writes it"
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "description": "events: required, optional or resource (iCalendar ROLE and CUTYPE)"
+        },
+        {
+          "name": "status",
+          "type": "enum",
+          "values": [
+            "accepted",
+            "declined",
+            "tentative",
+            "needs_action"
+          ],
+          "description": "events: the participation status (iCalendar PARTSTAT)"
+        }
+      ]
+    }
+  ],
+  "models": [
+    {
+      "urn": "urn:postware:system:identity",
+      "name": "identity",
+      "title": "Identity",
+      "version": 1,
+      "group": "system",
+      "description": "How a principal authenticates: a provider's stable subject bound to a Member (an operator) or a Person (an end user), with the asserted email and the kinds of factor used. Credential material lives in the auth store, never here.",
+      "agent_context": "Identity is written by the auth component when someone signs in; you never create or edit one. A Person with an\nIdentity is an end user. Dedupe by (provider, subject); an email is never an Identity key, only a Person one.\nThe one mistake: looking for passwords or tokens here; credentials are never stored on records.",
+      "identity": [
+        [
+          "provider",
+          "subject"
+        ]
+      ],
+      "status_categories": [
+        "active",
+        "disabled"
+      ],
+      "fields": [
+        {
+          "name": "principal",
+          "type": "ref",
+          "required": true,
+          "to": [
+            "member",
+            "person"
+          ],
+          "description": "operator or end user"
+        },
+        {
+          "name": "provider",
+          "type": "string",
+          "required": true,
+          "description": "builtin, or the issuer URL of an external provider"
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "required": true,
+          "description": "the provider's stable id (OIDC sub)"
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "description": "the address this login asserts; never a key"
+        },
+        {
+          "name": "email_verified",
+          "type": "bool",
+          "required": true,
+          "default": false
+        },
+        {
+          "name": "factors",
+          "type": "enum",
+          "list": true,
+          "required": true,
+          "values": [
+            "magic_link",
+            "password",
+            "passkey",
+            "totp",
+            "sms",
+            "oauth",
+            "saml",
+            "api_key"
+          ],
+          "default": [],
+          "description": "the kinds of credential used; device and enrolment details live in the auth store"
+        },
+        {
+          "name": "claims",
+          "type": "object",
+          "description": "mapped provider claims; never tokens"
+        },
+        {
+          "name": "status",
+          "type": "Status",
+          "required": true,
+          "default": {
+            "category": "active"
+          }
+        },
+        {
+          "name": "last_seen_at",
+          "type": "datetime",
+          "description": "touched at most once an hour; drives the monthly active user count"
+        }
+      ],
+      "sensitivity": {
+        "claims": "confidential"
+      }
+    },
+    {
+      "urn": "urn:postware:system:import_run",
+      "name": "import_run",
+      "title": "Import run",
+      "version": 1,
+      "group": "system",
+      "description": "One execution of an importer: which importer, in which mode, with what outcome and per-model counts. Every record it wrote carries its id in source.import_run.",
+      "agent_context": "An ImportRun is created by import_run or `a import`, never by hand; read it for the counts and the errors, and\nalways run with dry_run first. Find what a run wrote by querying source.import_run. The one mistake: retrying a\npartial run without reading its errors; the rows that succeeded are already upserted and simply update again.",
+      "identity": [],
+      "fields": [
+        {
+          "name": "importer",
+          "type": "string",
+          "required": true,
+          "description": "csv, stripe, supabase, ..."
+        },
+        {
+          "name": "mode",
+          "type": "enum",
+          "required": true,
+          "values": [
+            "once",
+            "continuous"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "enum",
+          "required": true,
+          "values": [
+            "running",
+            "succeeded",
+            "failed",
+            "partial"
+          ]
+        },
+        {
+          "name": "dry_run",
+          "type": "bool",
+          "required": true,
+          "default": false
+        },
+        {
+          "name": "started_at",
+          "type": "datetime",
+          "required": true
+        },
+        {
+          "name": "finished_at",
+          "type": "datetime"
+        },
+        {
+          "name": "counts",
+          "type": "object",
+          "required": true,
+          "description": "per model: {created, updated, skipped, errors}"
+        },
+        {
+          "name": "errors",
+          "type": "object",
+          "list": true,
+          "fields": [
+            {
+              "name": "row",
+              "type": "int",
+              "description": "the source row, 1-based, header excluded"
+            },
+            {
+              "name": "path",
+              "type": "string",
+              "description": "the field path that failed"
+            },
+            {
+              "name": "code",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "message",
+              "type": "string",
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:system:member",
+      "name": "member",
+      "title": "Member",
+      "version": 1,
+      "group": "system",
+      "description": "An operator of the workspace: a person on the team, an agent or a service, with roles. Authorization, audit and the owner and assignee fields point at Members.",
+      "agent_context": "Member is who operates the workspace, including you: an agent runs as the Member its API key was created for.\nEnd users of the product are never Members; they are Persons with an Identity, and a guest is a Person with a\nShare, not a role. Dedupe by person, or by the invitation email while invited. The one mistake: creating a\nMember to represent a customer or a contact; create a Person instead.",
+      "identity": [
+        [
+          "person"
+        ],
+        [
+          "invitation.email"
+        ]
+      ],
+      "status_categories": [
+        "invited",
+        "active",
+        "suspended"
+      ],
+      "fields": [
+        {
+          "name": "kind",
+          "type": "enum",
+          "required": true,
+          "values": [
+            "person",
+            "agent",
+            "service"
+          ]
+        },
+        {
+          "name": "display_name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "person",
+          "type": "ref",
+          "to": [
+            "person"
+          ],
+          "description": "the operator's own Person record"
+        },
+        {
+          "name": "roles",
+          "type": "string",
+          "list": true,
+          "required": true,
+          "description": "owner, admin, member, or a custom role name that policies grant"
+        },
+        {
+          "name": "status",
+          "type": "Status",
+          "required": true,
+          "default": {
+            "category": "active"
+          }
+        },
+        {
+          "name": "invitation",
+          "type": "object",
+          "fields": [
+            {
+              "name": "email",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "invited_by",
+              "type": "ref",
+              "to": [
+                "member"
+              ]
+            },
+            {
+              "name": "expires_at",
+              "type": "datetime"
+            }
+          ],
+          "description": "set while status is invited; the magic link sent to this email activates the Member"
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:system:policy",
+      "name": "policy",
+      "title": "Policy",
+      "version": 1,
+      "group": "system",
+      "description": "A rule: which principals may do which actions on which model, narrowed by a filter in the query grammar. Packs ship defaults, admins edit them, Shares compile into them.",
+      "agent_context": "Policies are ANDed into every read and write by end users, guests and the public; members are governed by roles\nand never consult them. Only admins write Policies. Dedupe by name. The one mistake: a `where` written against\nfields the model in applies_to does not have; run it as a query first.",
+      "identity": [
+        [
+          "name"
+        ]
+      ],
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "principal",
+          "type": "object",
+          "required": true,
+          "fields": [
+            {
+              "name": "kind",
+              "type": "enum",
+              "required": true,
+              "values": [
+                "role",
+                "end_user",
+                "share",
+                "public"
+              ]
+            },
+            {
+              "name": "value",
+              "type": "string",
+              "description": "the role name for role, the share id for share"
+            }
+          ],
+          "description": "the class of caller the policy applies to"
+        },
+        {
+          "name": "applies_to",
+          "type": "string",
+          "required": true,
+          "description": "a model name, or * for every model"
+        },
+        {
+          "name": "actions",
+          "type": "enum",
+          "list": true,
+          "required": true,
+          "values": [
+            "read",
+            "create",
+            "update",
+            "delete"
+          ]
+        },
+        {
+          "name": "where",
+          "type": "object",
+          "description": "a where object of the query grammar; variables @principal.person, @principal.member, @principal.identity, @principal.affiliated_organizations, @share.id, @now"
+        },
+        {
+          "name": "fields",
+          "type": "string",
+          "list": true,
+          "description": "field allow-list for read or update"
+        },
+        {
+          "name": "enabled",
+          "type": "bool",
+          "required": true,
+          "default": true
+        },
+        {
+          "name": "origin",
+          "type": "enum",
+          "required": true,
+          "values": [
+            "pack",
+            "workspace",
+            "share"
+          ],
+          "default": "workspace",
+          "description": "who created it"
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:system:share",
+      "name": "share",
+      "title": "Share",
+      "version": 1,
+      "group": "system",
+      "description": "A grant of read, and optionally comment, access to records, by ids or by filter, to someone outside the workspace: a link, an email, another workspace or the public. Compiles into Policies for a synthetic principal.",
+      "agent_context": "Share is how records leave the workspace without being copied. Content is published by the Content pack's public\npolicy (a Collection with public: true), the same shape a public Share compiles to. Scope by filter when the set\nchanges over time, by ids when it is fixed. Comment is granted to email grantees only: a Note has an author. A link token is returned once at creation and lives in the credential store, never on the record.\nThe one mistake: deleting a Share to revoke it; set status to revoked, which keeps the audit trail.",
+      "identity": [],
+      "status_categories": [
+        "active",
+        "revoked"
+      ],
+      "fields": [
+        {
+          "name": "scope",
+          "type": "Scope",
+          "required": true,
+          "description": "by ids or by filter"
+        },
+        {
+          "name": "grantee",
+          "type": "Grantee",
+          "required": true,
+          "description": "link, email, workspace or public"
+        },
+        {
+          "name": "permissions",
+          "type": "enum",
+          "list": true,
+          "required": true,
+          "values": [
+            "read",
+            "comment"
+          ]
+        },
+        {
+          "name": "expires_at",
+          "type": "datetime"
+        },
+        {
+          "name": "status",
+          "type": "Status",
+          "required": true,
+          "default": {
+            "category": "active"
+          }
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:system:tag",
+      "name": "tag",
+      "title": "Tag",
+      "version": 1,
+      "group": "system",
+      "description": "A label that works the same on every record: a namespaced slug with a display name, a colour and a description. The envelope's tags[] holds slugs that resolve to Tag records.",
+      "agent_context": "Tags classify; they never carry meaning the standard depends on (that is a field or a Status). Write slugs in\ntags[] on any record and missing workspace tags are created for you; create a Tag record only to set a colour or\na description. A slug is [namespace:]segment(/segment)*, each segment [a-z0-9][a-z0-9_-]{0,63}, at most 255\ncharacters, compared case-insensitively; name is the display form. Dedupe by (namespace, slug). The one mistake:\nwriting into a reserved namespace (sys, a pack name, a source name); those belong to the server, packs and importers.",
+      "identity": [
+        [
+          "namespace",
+          "slug"
+        ]
+      ],
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "the display form; may carry case and spaces"
+        },
+        {
+          "name": "slug",
+          "type": "string",
+          "required": true,
+          "description": "lowercase segments joined by /",
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}(?:/[a-z0-9][a-z0-9_-]{0,63})*$",
+          "max": 255,
+          "index": true
+        },
+        {
+          "name": "namespace",
+          "type": "string",
+          "description": "none = workspace-local; sys, a pack name and a source name are reserved",
+          "pattern": "^[a-z][a-z0-9-]{0,31}$"
+        },
+        {
+          "name": "color",
+          "type": "string",
+          "description": "#RRGGBB",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "applies_to",
+          "type": "string",
+          "list": true,
+          "description": "model names this tag is meant for; absent means any"
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:system:workspace",
+      "name": "workspace",
+      "title": "Workspace",
+      "version": 1,
+      "group": "system",
+      "description": "The tenant: one company or one person, holding exactly one of these records, its first. Holds the installed packs and the members, identities, policies, shares, tags and records.",
+      "agent_context": "Workspace is the tenant. You never create one; provisioning does, and a workspace holds exactly one of these\nrecords. Read it for the installed packs and the sign-in settings. Dedupe by slug. The one mistake: updating auth\nwithout reading it first; the object is replaced whole on update.",
+      "identity": [
+        [
+          "slug"
+        ]
+      ],
+      "status_categories": [
+        "active",
+        "paused",
+        "suspended",
+        "deleted"
+      ],
+      "fields": [
+        {
+          "name": "slug",
+          "type": "string",
+          "required": true,
+          "description": "URL-safe, unique per server or platform",
+          "pattern": "^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$",
+          "index": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "kind",
+          "type": "enum",
+          "values": [
+            "business",
+            "personal",
+            "platform"
+          ],
+          "default": "business"
+        },
+        {
+          "name": "status",
+          "type": "Status",
+          "required": true,
+          "default": {
+            "category": "active"
+          }
+        },
+        {
+          "name": "avatar",
+          "type": "ref",
+          "to": [
+            "file"
+          ]
+        },
+        {
+          "name": "packs",
+          "type": "string",
+          "list": true,
+          "required": true,
+          "default": [],
+          "description": "installed packs"
+        },
+        {
+          "name": "auth",
+          "type": "object",
+          "fields": [
+            {
+              "name": "allowed_email_domains",
+              "type": "string",
+              "list": true,
+              "description": "when set, only these domains may sign up as end users"
+            },
+            {
+              "name": "allowed_redirect_uris",
+              "type": "string",
+              "list": true,
+              "description": "redirect URIs the magic-link and OAuth flows may return to; localhost is always allowed"
+            },
+            {
+              "name": "allowed_origins",
+              "type": "string",
+              "list": true,
+              "description": "CORS origins"
+            },
+            {
+              "name": "magic_link_from_name",
+              "type": "string"
+            },
+            {
+              "name": "signup",
+              "type": "enum",
+              "values": [
+                "open",
+                "invite_only"
+              ],
+              "default": "open",
+              "description": "whether an unknown email may create an end user"
+            },
+            {
+              "name": "issuers",
+              "type": "object",
+              "list": true,
+              "fields": [
+                {
+                  "name": "issuer",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "audience",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "jwks_uri",
+                  "type": "string"
+                },
+                {
+                  "name": "claims",
+                  "type": "object",
+                  "fields": [
+                    {
+                      "name": "subject",
+                      "type": "string",
+                      "default": "sub"
+                    },
+                    {
+                      "name": "email",
+                      "type": "string",
+                      "default": "email"
+                    },
+                    {
+                      "name": "email_verified",
+                      "type": "string",
+                      "default": "email_verified"
+                    },
+                    {
+                      "name": "name",
+                      "type": "string",
+                      "default": "name"
+                    },
+                    {
+                      "name": "roles",
+                      "type": "string"
+                    }
+                  ],
+                  "description": "which claim carries each value"
+                },
+                {
+                  "name": "principal",
+                  "type": "object",
+                  "fields": [
+                    {
+                      "name": "kind",
+                      "type": "enum",
+                      "required": true,
+                      "values": [
+                        "end_user",
+                        "member"
+                      ]
+                    },
+                    {
+                      "name": "member_role_claim_values",
+                      "type": "object",
+                      "description": "role name to claim value, for member issuers"
+                    },
+                    {
+                      "name": "auto_join",
+                      "type": "bool",
+                      "description": "for member issuers: add anyone the issuer vouches for as a Member; off means invited or bound people only"
+                    }
+                  ]
+                }
+              ],
+              "description": "external OIDC issuers this workspace trusts"
+            }
+          ],
+          "description": "sign-in settings"
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:core:event",
+      "name": "event",
+      "title": "Event",
+      "version": 1,
+      "group": "core",
+      "description": "A scheduled block of time: a meeting, a call, an appointment, a reminder. One record per series; a logged call or meeting is an Event too.",
+      "agent_context": "Event is anything with a time slot, past or future; the timeline of a Deal or a Ticket is a query over the Events,\nMessages, Notes and Tasks about it. Give a recurring Event its IANA timezone so local times survive daylight\nsaving; one Recurrence rule per series, exceptions are ext.calendar.*. Dedupe by the iCalendar uid identifier\n(system ical:uid). The one mistake: an attendee as free text when a Person or Member exists; set attendees[].ref.",
+      "identity": [
+        [
+          "identifiers"
+        ]
+      ],
+      "status_categories": [
+        "confirmed",
+        "tentative",
+        "cancelled"
+      ],
+      "fields": [
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "text"
+        },
+        {
+          "name": "period",
+          "type": "Period",
+          "required": true,
+          "description": "start inclusive; end exclusive, omitted for a zero-duration event"
+        },
+        {
+          "name": "timezone",
+          "type": "string",
+          "description": "IANA zone of start and end"
+        },
+        {
+          "name": "all_day",
+          "type": "bool",
+          "default": false
+        },
+        {
+          "name": "status",
+          "type": "Status",
+          "required": true,
+          "default": {
+            "category": "confirmed"
+          }
+        },
+        {
+          "name": "location",
+          "type": "string"
+        },
+        {
+          "name": "conference_url",
+          "type": "string"
+        },
+        {
+          "name": "organizer",
+          "type": "Participant"
+        },
+        {
+          "name": "attendees",
+          "type": "Participant",
+          "list": true
+        },
+        {
+          "name": "recurrence",
+          "type": "Recurrence"
+        },
+        {
+          "name": "about",
+          "type": "ref",
+          "list": true,
+          "to": [
+            "any"
+          ]
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:core:file",
+      "name": "file",
+      "title": "File",
+      "version": 1,
+      "group": "core",
+      "description": "Stored or referenced binary content with a name and a type. The bytes live in object storage or on disk; the record holds the name, type, size and location.",
+      "agent_context": "Create a File through the upload flow (upload-url, then complete), not by hand, so the storage key and the sha256\nidentifier are right. Dedupe by identifier: the server adds {system: sha256} for stored bytes; sources may add\nmd5, sha1, crc32, quickxor or dropbox:content-hash, and \u003csource\u003e:file for their own ids. The one mistake: a URL to\nan external file stored as a File; a File is bytes the workspace holds or a source system stores.",
+      "identity": [
+        [
+          "identifiers"
+        ]
+      ],
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "mime_type",
+          "type": "string",
+          "required": true,
+          "description": "detected by the server; importers fall back to the extension or application/octet-stream"
+        },
+        {
+          "name": "size",
+          "type": "int",
+          "description": "bytes; absent for native cloud documents"
+        },
+        {
+          "name": "storage",
+          "type": "object",
+          "required": true,
+          "fields": [
+            {
+              "name": "provider",
+              "type": "string",
+              "required": true,
+              "description": "local, s3, or a source system"
+            },
+            {
+              "name": "key",
+              "type": "string",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "about",
+          "type": "ref",
+          "list": true,
+          "to": [
+            "any"
+          ]
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:core:message",
+      "name": "message",
+      "title": "Message",
+      "version": 1,
+      "group": "core",
+      "description": "One message on a channel: an email, a chat message, an SMS, a call record, with sender, recipients, body and the records it is about. A Ticket's conversation is its Messages.",
+      "agent_context": "Message is a communication that happened or will be sent; internal commentary is a Note. Link it to the Ticket or\nDeal through about and to its thread through thread_key. Dedupe by identifier: email:message-id (the Message-ID\nwithout angle brackets) for mail, slack:ts for chat, \u003csource\u003e:message otherwise. The one mistake: setting\ndelivery on an inbound Message; delivery describes outbound sending.",
+      "identity": [
+        [
+          "identifiers"
+        ]
+      ],
+      "fields": [
+        {
+          "name": "channel",
+          "type": "enum",
+          "required": true,
+          "values": [
+            "email",
+            "chat",
+            "sms",
+            "phone",
+            "web",
+            "social",
+            "api",
+            "other"
+          ]
+        },
+        {
+          "name": "direction",
+          "type": "enum",
+          "required": true,
+          "values": [
+            "inbound",
+            "outbound",
+            "internal"
+          ]
+        },
+        {
+          "name": "from",
+          "type": "Participant",
+          "required": true
+        },
+        {
+          "name": "to",
+          "type": "Participant",
+          "list": true
+        },
+        {
+          "name": "cc",
+          "type": "Participant",
+          "list": true
+        },
+        {
+          "name": "bcc",
+          "type": "Participant",
+          "list": true
+        },
+        {
+          "name": "reply_to",
+          "type": "Participant",
+          "list": true
+        },
+        {
+          "name": "subject",
+          "type": "string"
+        },
+        {
+          "name": "body",
+          "type": "text",
+          "required": true,
+          "description": "plain text or Markdown; may be empty when the message is only attachments"
+        },
+        {
+          "name": "body_html",
+          "type": "text"
+        },
+        {
+          "name": "sent_at",
+          "type": "datetime",
+          "required": true,
+          "index": true
+        },
+        {
+          "name": "thread_key",
+          "type": "string",
+          "description": "opaque grouping key: a mail thread id, a chat channel and thread, a ticket id",
+          "index": true
+        },
+        {
+          "name": "in_reply_to",
+          "type": "ref",
+          "to": [
+            "message"
+          ]
+        },
+        {
+          "name": "attachments",
+          "type": "ref",
+          "list": true,
+          "to": [
+            "file"
+          ]
+        },
+        {
+          "name": "delivery",
+          "type": "enum",
+          "values": [
+            "draft",
+            "queued",
+            "sent",
+            "delivered",
+            "failed"
+          ],
+          "description": "outbound only"
+        },
+        {
+          "name": "about",
+          "type": "ref",
+          "list": true,
+          "to": [
+            "any"
+          ],
+          "description": "the Ticket, the Deal"
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:core:note",
+      "name": "note",
+      "title": "Note",
+      "version": 1,
+      "group": "core",
+      "description": "Free text about one or more records: an internal note, a comment, a meeting summary. A Note about exactly one record is a comment on it.",
+      "agent_context": "Note is the only place for commentary; a conversation with a customer is Messages. Always set about (the records\nit concerns) and author. Dedupe by identifier only. The one mistake: visibility shared on a Note meant for the\nteam; shared Notes are readable by the end users who can read the record they are about.",
+      "identity": [
+        [
+          "identifiers"
+        ]
+      ],
+      "fields": [
+        {
+          "name": "body",
+          "type": "text",
+          "required": true,
+          "description": "Markdown"
+        },
+        {
+          "name": "author",
+          "type": "ref",
+          "required": true,
+          "to": [
+            "member",
+            "person"
+          ],
+          "description": "a guest's comment is a Note by a Person"
+        },
+        {
+          "name": "about",
+          "type": "ref",
+          "list": true,
+          "required": true,
+          "to": [
+            "any"
+          ],
+          "description": "one record makes it a comment; several make a CRM note"
+        },
+        {
+          "name": "visibility",
+          "type": "enum",
+          "values": [
+            "internal",
+            "shared"
+          ],
+          "default": "internal"
+        },
+        {
+          "name": "attachments",
+          "type": "ref",
+          "list": true,
+          "to": [
+            "file"
+          ]
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:core:organization",
+      "name": "organization",
+      "title": "Organization",
+      "version": 1,
+      "group": "core",
+      "description": "A company, nonprofit, government body or household: a customer, a vendor, a partner or an account. The relationship to the workspace lives on Deals, Invoices, affiliations and tags, never on the Organization.",
+      "agent_context": "Use Organization for any company or institution. Dedupe by the domain identifier (identifiers [{system: domain,\nvalue: ...}]); derive the domain from a website URL before creating, and add vat:*, duns or lei identifiers when\nknown. Firmographics (industry, employees, annual revenue) are ext.crm.*, the registered name for invoices is\next.billing.legal_name, and the relationship (customer, partner, vendor) is a tag. The one mistake: a second\nOrganization for the same company under another spelling of its name.",
+      "identity": [
+        [
+          "identifiers"
+        ]
+      ],
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "phones",
+          "type": "ContactPoint",
+          "list": true
+        },
+        {
+          "name": "urls",
+          "type": "ContactPoint",
+          "list": true,
+          "description": "website first; social profiles after"
+        },
+        {
+          "name": "addresses",
+          "type": "Address",
+          "list": true,
+          "description": "kind billing, shipping, mailing, work or other"
+        },
+        {
+          "name": "parent",
+          "type": "ref",
+          "to": [
+            "organization"
+          ]
+        },
+        {
+          "name": "logo",
+          "type": "ref",
+          "to": [
+            "file"
+          ]
+        },
+        {
+          "name": "description",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:core:person",
+      "name": "person",
+      "title": "Person",
+      "version": 1,
+      "group": "core",
+      "description": "A human being: a customer, a contact, an employee, or an end user of the product.",
+      "agent_context": "Use Person for any human, whatever their role. Roles live on relationships (affiliations, Deal.people,\nTicket.requester), never on the Person; a lead is a Person with ext.crm.lifecycle_stage lead. Dedupe by email:\nbefore creating, query by emails.value or use upsert. An end user of the product is a Person that holds an\nIdentity; you never create Identities yourself. The one mistake: a second Person for the same human under another\nemail; add the address to emails[] instead.",
+      "identity": [
+        [
+          "emails.value"
+        ],
+        [
+          "identifiers"
+        ]
+      ],
+      "fields": [
+        {
+          "name": "name",
+          "type": "Name",
+          "required": true
+        },
+        {
+          "name": "emails",
+          "type": "ContactPoint",
+          "list": true
+        },
+        {
+          "name": "phones",
+          "type": "ContactPoint",
+          "list": true,
+          "description": "label mobile, home, fax, work or other"
+        },
+        {
+          "name": "urls",
+          "type": "ContactPoint",
+          "list": true,
+          "description": "websites and social profiles; the URL identifies the network"
+        },
+        {
+          "name": "addresses",
+          "type": "Address",
+          "list": true
+        },
+        {
+          "name": "job_title",
+          "type": "string"
+        },
+        {
+          "name": "affiliations",
+          "type": "Affiliation",
+          "list": true,
+          "description": "Organizations this person belongs to, with role, primary flag and period"
+        },
+        {
+          "name": "avatar",
+          "type": "ref",
+          "to": [
+            "file"
+          ]
+        },
+        {
+          "name": "birthday",
+          "type": "date"
+        },
+        {
+          "name": "locale",
+          "type": "string",
+          "description": "BCP 47; the OIDC locale claim"
+        },
+        {
+          "name": "timezone",
+          "type": "string",
+          "description": "IANA zone; the OIDC zoneinfo claim"
+        },
+        {
+          "name": "description",
+          "type": "text"
+        }
+      ],
+      "sensitivity": {
+        "birthday": "confidential"
+      }
+    },
+    {
+      "urn": "urn:postware:core:product",
+      "name": "product",
+      "title": "Product",
+      "version": 1,
+      "group": "core",
+      "description": "A thing the business sells or buys: a good, a service or a digital item. What it costs lives on a Price in the Billing pack.",
+      "agent_context": "One Product per sellable thing, never one per price: the amount, currency and billing interval live on Prices\nthat reference it, and a plan billed monthly and yearly is one Product with two Prices. Dedupe by the sku\nidentifier (system sku). Inventory counts, purchase cost and ledger accounts are extensions. The one mistake:\ndeleting a Product that Invoices or Subscriptions reference; set active to false instead.",
+      "identity": [
+        [
+          "identifiers"
+        ]
+      ],
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "description",
+          "type": "text"
+        },
+        {
+          "name": "kind",
+          "type": "enum",
+          "values": [
+            "good",
+            "service",
+            "digital"
+          ]
+        },
+        {
+          "name": "unit",
+          "type": "string",
+          "description": "default unit of measure for invoice lines: a UN/ECE Rec 20 code (C62, HUR) or a word (seat, hour)"
+        },
+        {
+          "name": "tax_rate",
+          "type": "ref",
+          "to": [
+            "tax_rate"
+          ],
+          "description": "the default tax rate for lines of this product"
+        },
+        {
+          "name": "active",
+          "type": "bool",
+          "required": true,
+          "default": true
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:core:project",
+      "name": "project",
+      "title": "Project",
+      "version": 1,
+      "group": "core",
+      "description": "A container of work with a lifecycle: planned, active, paused, done or cancelled. Tasks belong to it.",
+      "agent_context": "Project is the container Tasks belong to; link it to what it is for through about (the client Organization, the\nDeal). Dedupe by identifier only, so check for an existing Project by name before creating one. archived_at\nhides it from default views and is independent of status. The one mistake: marking a Project done while Tasks\nin it are still open.",
+      "identity": [
+        [
+          "identifiers"
+        ]
+      ],
+      "status_categories": [
+        "planned",
+        "active",
+        "paused",
+        "done",
+        "cancelled"
+      ],
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "description",
+          "type": "text"
+        },
+        {
+          "name": "status",
+          "type": "Status",
+          "required": true,
+          "default": {
+            "category": "active"
+          }
+        },
+        {
+          "name": "members",
+          "type": "ref",
+          "list": true,
+          "to": [
+            "member"
+          ]
+        },
+        {
+          "name": "archived_at",
+          "type": "datetime",
+          "description": "hidden from default views; independent of status"
+        },
+        {
+          "name": "about",
+          "type": "ref",
+          "list": true,
+          "to": [
+            "any"
+          ],
+          "description": "the client, the deal"
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:core:task",
+      "name": "task",
+      "title": "Task",
+      "version": 1,
+      "group": "core",
+      "description": "A unit of work with a status, a priority, assignees and a due date. It nests under a parent Task and belongs to one Project.",
+      "agent_context": "Task is work someone has to do; a reminder at a time is an Event, a request from a customer is a Ticket. Use\ndue_on for a date and due_at only when the source has a time of day. Blocked is a state label under open or\nin_progress, not a category. Dedupe by identifier only, so search open Tasks by title before creating one.\nThe one mistake: setting status.category to done without completed_at; set both.",
+      "identity": [
+        [
+          "identifiers"
+        ]
+      ],
+      "status_categories": [
+        "open",
+        "in_progress",
+        "done",
+        "cancelled"
+      ],
+      "fields": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "description",
+          "type": "text"
+        },
+        {
+          "name": "status",
+          "type": "Status",
+          "required": true,
+          "default": {
+            "category": "open"
+          }
+        },
+        {
+          "name": "priority",
+          "type": "enum",
+          "values": [
+            "urgent",
+            "high",
+            "normal",
+            "low"
+          ]
+        },
+        {
+          "name": "assignees",
+          "type": "ref",
+          "list": true,
+          "to": [
+            "member"
+          ]
+        },
+        {
+          "name": "due_on",
+          "type": "date",
+          "index": true
+        },
+        {
+          "name": "due_at",
+          "type": "datetime",
+          "description": "set only when the source has a time of day"
+        },
+        {
+          "name": "completed_at",
+          "type": "datetime"
+        },
+        {
+          "name": "parent",
+          "type": "ref",
+          "to": [
+            "task"
+          ]
+        },
+        {
+          "name": "project",
+          "type": "ref",
+          "to": [
+            "project"
+          ]
+        },
+        {
+          "name": "about",
+          "type": "ref",
+          "list": true,
+          "to": [
+            "any"
+          ]
+        }
+      ],
+      "events": [
+        {
+          "field": "status.category",
+          "to": "done",
+          "name": "task.completed"
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:core:team",
+      "name": "team",
+      "title": "Team",
+      "version": 1,
+      "group": "core",
+      "description": "A named group of Members that work is assigned to.",
+      "agent_context": "Team groups Members of this workspace (operators), not Persons; a customer's departments are Organizations with a\nparent. Dedupe by a source identifier, then by name. Hierarchy, group type and a lead are ext.org.*; the\naccountable operator is the envelope's owner. The one mistake: adding a Person to members; only Members belong.",
+      "identity": [
+        [
+          "identifiers"
+        ],
+        [
+          "name"
+        ]
+      ],
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "description",
+          "type": "text"
+        },
+        {
+          "name": "members",
+          "type": "ref",
+          "list": true,
+          "to": [
+            "member"
+          ]
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:crm:deal",
+      "name": "deal",
+      "title": "Deal",
+      "version": 1,
+      "group": "crm",
+      "description": "A potential sale to an Organization or a Person, tracked through a Pipeline, with an amount, a probability and an expected close. Won or lost is the status category.",
+      "agent_context": "Deal is the opportunity, not the customer: the customer is the Organization or Person it points at. Set stage\nto a key of its Pipeline; status.category follows that stage's category unless you set it (a deal can be lost\nfrom any stage), and won emits deal.won. people[] holds the contacts on the deal, one marked primary. Dedupe by\nidentifier only, so query open Deals for the same Organization before creating one. The one mistake: products,\nquantities and prices on the Deal; they belong on the quote or the Invoice.",
+      "identity": [
+        [
+          "identifiers"
+        ]
+      ],
+      "status_categories": [
+        "open",
+        "won",
+        "lost"
+      ],
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "organization",
+          "type": "ref",
+          "to": [
+            "organization"
+          ]
+        },
+        {
+          "name": "people",
+          "type": "object",
+          "list": true,
+          "fields": [
+            {
+              "name": "person",
+              "type": "ref",
+              "required": true,
+              "to": [
+                "person"
+              ]
+            },
+            {
+              "name": "primary",
+              "type": "bool"
+            },
+            {
+              "name": "role",
+              "type": "string",
+              "description": "e.g. decision maker, billing contact"
+            }
+          ]
+        },
+        {
+          "name": "pipeline",
+          "type": "ref",
+          "required": true,
+          "to": [
+            "pipeline"
+          ]
+        },
+        {
+          "name": "stage",
+          "type": "string",
+          "required": true,
+          "description": "a stage key of the pipeline",
+          "index": true
+        },
+        {
+          "name": "status",
+          "type": "Status",
+          "required": true,
+          "default": {
+            "category": "open"
+          },
+          "description": "category defaults from the stage's category"
+        },
+        {
+          "name": "amount",
+          "type": "Money"
+        },
+        {
+          "name": "probability",
+          "type": "decimal",
+          "description": "0 to 1; defaults from the stage"
+        },
+        {
+          "name": "expected_close",
+          "type": "date"
+        },
+        {
+          "name": "closed_at",
+          "type": "datetime",
+          "description": "set when status.category leaves open"
+        },
+        {
+          "name": "description",
+          "type": "text"
+        }
+      ],
+      "events": [
+        {
+          "field": "status.category",
+          "to": "won",
+          "name": "deal.won"
+        },
+        {
+          "field": "status.category",
+          "to": "lost",
+          "name": "deal.lost"
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:crm:pipeline",
+      "name": "pipeline",
+      "title": "Pipeline",
+      "version": 1,
+      "group": "crm",
+      "description": "An ordered set of stages that Deals move through, each mapped to one of the standard categories open, won or lost. A workspace has one default pipeline.",
+      "agent_context": "Read the default pipeline before creating a Deal and use one of its stage keys; Deal.pipeline is required and\nthe default pipeline is used when you omit it. Every pipeline holds at least one open, one won and one lost\nstage. Dedupe by name. The one mistake: deleting or re-keying a stage that Deals reference; set archived true\nand keep the key.",
+      "identity": [
+        [
+          "name"
+        ]
+      ],
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "default",
+          "type": "bool",
+          "default": false,
+          "description": "the pipeline new Deals go to when none is given"
+        },
+        {
+          "name": "stages",
+          "type": "object",
+          "list": true,
+          "required": true,
+          "fields": [
+            {
+              "name": "key",
+              "type": "string",
+              "required": true,
+              "description": "stable, snake_case; referenced by Deal.stage"
+            },
+            {
+              "name": "label",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "category",
+              "type": "enum",
+              "required": true,
+              "values": [
+                "open",
+                "won",
+                "lost"
+              ]
+            },
+            {
+              "name": "order",
+              "type": "int",
+              "required": true
+            },
+            {
+              "name": "probability",
+              "type": "decimal",
+              "description": "0 to 1; the default for Deal.probability"
+            },
+            {
+              "name": "archived",
+              "type": "bool",
+              "description": "retired; kept because Deals still reference it"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:billing:invoice",
+      "name": "invoice",
+      "title": "Invoice",
+      "version": 1,
+      "group": "billing",
+      "description": "A statement of money owed for goods or services: receivable when we issued it, payable when we received it (a bill). Lines with amounts and taxes, totals, a status from draft to paid, and the payments applied to it.",
+      "agent_context": "Create with status draft; number may be empty until the invoice leaves draft, then it is required and unique per\nworkspace for receivable invoices and per counterparty for payable ones. subtotal is the sum of lines.amount,\ntotal is subtotal minus discount_total plus tax_total (tax_total excluded when tax_inclusive), amount_due is\ntotal minus amount_paid (zero on a void invoice); overdue and partially paid are queries, not statuses. The one mistake: status paid\nwithout a Payment; create the Payment, apply it, then set paid and paid_at, which emits invoice.paid.",
+      "identity": [
+        [
+          "identifiers"
+        ],
+        [
+          "direction",
+          "counterparty",
+          "number"
+        ]
+      ],
+      "status_categories": [
+        "draft",
+        "open",
+        "paid",
+        "void",
+        "uncollectible"
+      ],
+      "fields": [
+        {
+          "name": "number",
+          "type": "string",
+          "description": "required once status is not draft; unique per workspace when receivable, per counterparty when payable",
+          "index": true
+        },
+        {
+          "name": "direction",
+          "type": "enum",
+          "required": true,
+          "values": [
+            "receivable",
+            "payable"
+          ],
+          "default": "receivable",
+          "description": "a bill is a payable Invoice"
+        },
+        {
+          "name": "counterparty",
+          "type": "ref",
+          "required": true,
+          "to": [
+            "organization",
+            "person"
+          ]
+        },
+        {
+          "name": "bill_to",
+          "type": "Address",
+          "description": "the billing address as printed; defaults from the counterparty"
+        },
+        {
+          "name": "status",
+          "type": "Status",
+          "required": true,
+          "default": {
+            "category": "draft"
+          }
+        },
+        {
+          "name": "issued_at",
+          "type": "date",
+          "required": true
+        },
+        {
+          "name": "due_at",
+          "type": "date",
+          "description": "due_at or terms is given when amount_due is above zero",
+          "index": true
+        },
+        {
+          "name": "terms",
+          "type": "string",
+          "description": "payment terms as text, e.g. Net 30"
+        },
+        {
+          "name": "currency",
+          "type": "string",
+          "required": true,
+          "description": "ISO 4217; every Money on the invoice uses it",
+          "pattern": "^[A-Z]{3}$"
+        },
+        {
+          "name": "tax_inclusive",
+          "type": "bool",
+          "required": true,
+          "default": false
+        },
+        {
+          "name": "lines",
+          "type": "object",
+          "list": true,
+          "required": true,
+          "fields": [
+            {
+              "name": "product",
+              "type": "ref",
+              "to": [
+                "product"
+              ]
+            },
+            {
+              "name": "price",
+              "type": "ref",
+              "to": [
+                "price"
+              ]
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "quantity",
+              "type": "decimal",
+              "required": true,
+              "default": "1"
+            },
+            {
+              "name": "unit",
+              "type": "string",
+              "description": "unit of measure; a UN/ECE Rec 20 code or a word"
+            },
+            {
+              "name": "unit_price",
+              "type": "Money",
+              "required": true
+            },
+            {
+              "name": "discount",
+              "type": "Money",
+              "description": "line-level discount already deducted from amount"
+            },
+            {
+              "name": "tax_rate",
+              "type": "ref",
+              "to": [
+                "tax_rate"
+              ]
+            },
+            {
+              "name": "tax_amount",
+              "type": "Money"
+            },
+            {
+              "name": "amount",
+              "type": "Money",
+              "required": true,
+              "description": "quantity times unit_price minus discount; includes tax only when tax_inclusive"
+            },
+            {
+              "name": "period",
+              "type": "Period",
+              "description": "the service period the line covers"
+            }
+          ]
+        },
+        {
+          "name": "subtotal",
+          "type": "Money",
+          "required": true,
+          "description": "the sum of lines.amount"
+        },
+        {
+          "name": "discount_total",
+          "type": "Money",
+          "description": "document-level discount"
+        },
+        {
+          "name": "tax_total",
+          "type": "Money",
+          "required": true
+        },
+        {
+          "name": "total",
+          "type": "Money",
+          "required": true
+        },
+        {
+          "name": "amount_paid",
+          "type": "Money",
+          "required": true,
+          "description": "maintained from applied Payments"
+        },
+        {
+          "name": "amount_due",
+          "type": "Money",
+          "required": true,
+          "description": "total minus amount_paid"
+        },
+        {
+          "name": "paid_at",
+          "type": "datetime"
+        },
+        {
+          "name": "reference",
+          "type": "string",
+          "description": "the buyer's PO or reference"
+        },
+        {
+          "name": "memo",
+          "type": "text",
+          "description": "a customer-facing note printed on the invoice"
+        },
+        {
+          "name": "subscription",
+          "type": "ref",
+          "to": [
+            "subscription"
+          ]
+        },
+        {
+          "name": "about",
+          "type": "ref",
+          "list": true,
+          "to": [
+            "any"
+          ],
+          "description": "the Deal, the Project"
+        }
+      ],
+      "events": [
+        {
+          "field": "status.category",
+          "to": "paid",
+          "name": "invoice.paid"
+        },
+        {
+          "field": "status.category",
+          "to": "void",
+          "name": "invoice.voided"
+        },
+        {
+          "field": "status.category",
+          "to": "uncollectible",
+          "name": "invoice.uncollectible"
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:billing:payment",
+      "name": "payment",
+      "title": "Payment",
+      "version": 1,
+      "group": "billing",
+      "description": "Money that moved against invoices: a customer paying us (receivable), us paying a vendor (payable), or a refund of either.",
+      "agent_context": "direction is the ledger side; kind says whether money went the normal way (payment) or back (refund, with\nrefund_of pointing at the original). applied[] says which Invoices this payment settles and by how much; update\ntheir amount_paid and status yourself. Payments recorded from accounting systems are succeeded; processor payments\ncarry pending, failed or cancelled. Dedupe by identifier (the processor's or ledger's id). The one mistake: a\nrefund as a negative amount; record a Payment of kind refund.",
+      "identity": [
+        [
+          "identifiers"
+        ]
+      ],
+      "status_categories": [
+        "pending",
+        "succeeded",
+        "failed",
+        "cancelled"
+      ],
+      "fields": [
+        {
+          "name": "direction",
+          "type": "enum",
+          "required": true,
+          "values": [
+            "receivable",
+            "payable"
+          ],
+          "default": "receivable"
+        },
+        {
+          "name": "kind",
+          "type": "enum",
+          "required": true,
+          "values": [
+            "payment",
+            "refund"
+          ],
+          "default": "payment"
+        },
+        {
+          "name": "counterparty",
+          "type": "ref",
+          "required": true,
+          "to": [
+            "organization",
+            "person"
+          ]
+        },
+        {
+          "name": "amount",
+          "type": "Money",
+          "required": true
+        },
+        {
+          "name": "paid_at",
+          "type": "datetime",
+          "required": true
+        },
+        {
+          "name": "method",
+          "type": "enum",
+          "values": [
+            "card",
+            "bank_transfer",
+            "direct_debit",
+            "cash",
+            "check",
+            "wallet",
+            "other"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "Status",
+          "required": true,
+          "default": {
+            "category": "succeeded"
+          }
+        },
+        {
+          "name": "applied",
+          "type": "object",
+          "list": true,
+          "fields": [
+            {
+              "name": "invoice",
+              "type": "ref",
+              "required": true,
+              "to": [
+                "invoice"
+              ]
+            },
+            {
+              "name": "amount",
+              "type": "Money",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "refund_of",
+          "type": "ref",
+          "to": [
+            "payment"
+          ]
+        },
+        {
+          "name": "reference",
+          "type": "string",
+          "description": "check number, bank reference, processor id or remittance text"
+        }
+      ],
+      "events": [
+        {
+          "field": "status.category",
+          "to": "succeeded",
+          "name": "payment.succeeded"
+        },
+        {
+          "field": "status.category",
+          "to": "failed",
+          "name": "payment.failed"
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:billing:price",
+      "name": "price",
+      "title": "Price",
+      "version": 1,
+      "group": "billing",
+      "description": "An amount at which a Product is sold, once or on a recurring interval. Subscription items and Invoice lines point at Prices.",
+      "agent_context": "interval one_time is a one-off price; any other interval with interval_count makes it recurring (month with\ninterval_count 3 bills quarterly). Metered usage, tiers and trials are ext.billing.*. Dedupe by an identifier\n(the billing provider's price id) or by (product, name). The one mistake: changing the amount of a Price that\nSubscriptions use; create a new Price and set active false on the old one.",
+      "identity": [
+        [
+          "identifiers"
+        ],
+        [
+          "product",
+          "name"
+        ]
+      ],
+      "fields": [
+        {
+          "name": "product",
+          "type": "ref",
+          "required": true,
+          "to": [
+            "product"
+          ]
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "description": "a short label: Monthly, Annual, 2 seats"
+        },
+        {
+          "name": "amount",
+          "type": "Money",
+          "required": true,
+          "description": "per unit, per interval; tax per tax_inclusive"
+        },
+        {
+          "name": "interval",
+          "type": "enum",
+          "required": true,
+          "values": [
+            "one_time",
+            "day",
+            "week",
+            "month",
+            "year"
+          ],
+          "default": "one_time"
+        },
+        {
+          "name": "interval_count",
+          "type": "int",
+          "default": 1,
+          "description": "intervals between charges; 3 with month bills quarterly"
+        },
+        {
+          "name": "tax_inclusive",
+          "type": "bool",
+          "required": true,
+          "default": false
+        },
+        {
+          "name": "active",
+          "type": "bool",
+          "required": true,
+          "default": true
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:billing:subscription",
+      "name": "subscription",
+      "title": "Subscription",
+      "version": 1,
+      "group": "billing",
+      "description": "A recurring agreement to bill (receivable) or be billed (payable) for Prices, period after period. Each period's charge is an Invoice that points back at it.",
+      "agent_context": "Subscription is the recurring relationship; each period's charge is an Invoice that references it. status pending\nmeans it exists but has not started, so current_period and started_at are absent; cancel_at set means it will\nnot renew; ended_at is when it stopped. Dedupe by identifier (the billing provider's subscription id). The one\nmistake: cancelled without ended_at and cancel_at; the dates are what the status means.",
+      "identity": [
+        [
+          "identifiers"
+        ]
+      ],
+      "status_categories": [
+        "pending",
+        "trialing",
+        "active",
+        "past_due",
+        "paused",
+        "cancelled"
+      ],
+      "fields": [
+        {
+          "name": "direction",
+          "type": "enum",
+          "required": true,
+          "values": [
+            "receivable",
+            "payable"
+          ],
+          "default": "receivable",
+          "description": "receivable = our customer; payable = a vendor we pay"
+        },
+        {
+          "name": "counterparty",
+          "type": "ref",
+          "required": true,
+          "to": [
+            "organization",
+            "person"
+          ]
+        },
+        {
+          "name": "items",
+          "type": "object",
+          "list": true,
+          "required": true,
+          "fields": [
+            {
+              "name": "price",
+              "type": "ref",
+              "required": true,
+              "to": [
+                "price"
+              ]
+            },
+            {
+              "name": "quantity",
+              "type": "decimal",
+              "required": true,
+              "default": "1"
+            }
+          ]
+        },
+        {
+          "name": "status",
+          "type": "Status",
+          "required": true
+        },
+        {
+          "name": "current_period",
+          "type": "Period",
+          "description": "the period being billed now; absent while pending"
+        },
+        {
+          "name": "started_at",
+          "type": "datetime"
+        },
+        {
+          "name": "trial_end",
+          "type": "datetime"
+        },
+        {
+          "name": "cancel_at",
+          "type": "datetime",
+          "description": "scheduled end; when set the subscription does not renew"
+        },
+        {
+          "name": "ended_at",
+          "type": "datetime"
+        },
+        {
+          "name": "reference",
+          "type": "string",
+          "description": "the customer's PO or reference, copied onto generated invoices"
+        }
+      ],
+      "events": [
+        {
+          "field": "status.category",
+          "to": "cancelled",
+          "name": "subscription.cancelled"
+        },
+        {
+          "field": "status.category",
+          "to": "active",
+          "name": "subscription.activated"
+        },
+        {
+          "field": "status.category",
+          "to": "past_due",
+          "name": "subscription.past_due"
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:billing:tax_rate",
+      "name": "tax_rate",
+      "title": "Tax rate",
+      "version": 1,
+      "group": "billing",
+      "description": "A named tax percentage applied to invoice lines (VAT 20%, GST 5%, a state sales tax), referenced by Products and Invoice lines.",
+      "agent_context": "One TaxRate per rate you charge, referenced from Invoice lines; rate is the total percentage applied to a line,\nand compound components, jurisdictions and tax kinds are ext.billing.*. Dedupe by a source identifier, then by\nname. The one mistake: editing a rate that past Invoices reference when the law changes; create a new TaxRate\nand set active false on the old one.",
+      "identity": [
+        [
+          "identifiers"
+        ],
+        [
+          "name"
+        ]
+      ],
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "rate",
+          "type": "decimal",
+          "required": true,
+          "description": "percent: 20 means 20%"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "active",
+          "type": "bool",
+          "required": true,
+          "default": true
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:support:ticket",
+      "name": "ticket",
+      "title": "Ticket",
+      "version": 1,
+      "group": "support",
+      "description": "A request for help from a Person, owned by the team until it is solved. The conversation is Messages about it; internal notes are Notes about it.",
+      "agent_context": "Ticket is the request; what was said is Messages with about [ticket], and what the team thinks is Notes about it.\nAssignment and status changes are the audit log, not records. The requester is a Person, often an end user of the\nproduct. Dedupe by the source system's id in identifiers, so search open Tickets from the same requester before\ncreating one. The one mistake: solved without a Message to the requester; solved emits ticket.solved.",
+      "identity": [
+        [
+          "identifiers"
+        ]
+      ],
+      "status_categories": [
+        "new",
+        "open",
+        "pending",
+        "on_hold",
+        "solved",
+        "closed"
+      ],
+      "fields": [
+        {
+          "name": "subject",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "description",
+          "type": "text",
+          "description": "the request as written; importers copy the first inbound message when the source has no description"
+        },
+        {
+          "name": "requester",
+          "type": "ref",
+          "required": true,
+          "to": [
+            "person"
+          ],
+          "description": "often the product's own end user"
+        },
+        {
+          "name": "organization",
+          "type": "ref",
+          "to": [
+            "organization"
+          ]
+        },
+        {
+          "name": "assignee",
+          "type": "ref",
+          "to": [
+            "member"
+          ]
+        },
+        {
+          "name": "team",
+          "type": "ref",
+          "to": [
+            "team"
+          ]
+        },
+        {
+          "name": "status",
+          "type": "Status",
+          "required": true,
+          "default": {
+            "category": "new"
+          }
+        },
+        {
+          "name": "priority",
+          "type": "enum",
+          "values": [
+            "urgent",
+            "high",
+            "normal",
+            "low"
+          ]
+        },
+        {
+          "name": "channel",
+          "type": "enum",
+          "values": [
+            "email",
+            "chat",
+            "sms",
+            "phone",
+            "web",
+            "social",
+            "api",
+            "other"
+          ]
+        },
+        {
+          "name": "due_at",
+          "type": "datetime"
+        },
+        {
+          "name": "resolved_at",
+          "type": "datetime",
+          "description": "first time status became solved or closed"
+        },
+        {
+          "name": "about",
+          "type": "ref",
+          "list": true,
+          "to": [
+            "any"
+          ]
+        }
+      ],
+      "events": [
+        {
+          "field": "status.category",
+          "to": "solved",
+          "name": "ticket.solved"
+        },
+        {
+          "field": "status.category",
+          "to": "closed",
+          "name": "ticket.closed"
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:content:collection",
+      "name": "collection",
+      "title": "Collection",
+      "version": 1,
+      "group": "content",
+      "description": "A set of Documents published together: a site, a blog, a docs tree, a changelog or a help centre, with a slug and a public flag that publishes its published Documents.",
+      "agent_context": "Collection is the publication unit; public true makes every Document in it with status published, and a\npublished_at that has passed, readable without sign-in. Dedupe by slug. The one mistake: assuming drafts leak\nwhen a Collection is public; only published Documents are served, but check its Documents before flipping it.",
+      "identity": [
+        [
+          "slug"
+        ]
+      ],
+      "fields": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "slug",
+          "type": "string",
+          "required": true,
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "index": true
+        },
+        {
+          "name": "kind",
+          "type": "enum",
+          "values": [
+            "site",
+            "blog",
+            "docs",
+            "changelog",
+            "help",
+            "other"
+          ],
+          "default": "other"
+        },
+        {
+          "name": "description",
+          "type": "text"
+        },
+        {
+          "name": "public",
+          "type": "bool",
+          "required": true,
+          "default": false,
+          "description": "makes its published Documents publicly readable through the Content pack's public policy"
+        }
+      ]
+    },
+    {
+      "urn": "urn:postware:content:document",
+      "name": "document",
+      "title": "Document",
+      "version": 1,
+      "group": "content",
+      "description": "One piece of content in a Collection: a page, a post, a docs article, a changelog entry or a help article, in Markdown, with a status from draft to published, authors, SEO metadata and an optional parent for hierarchies.",
+      "agent_context": "Document is Markdown content with a workflow; publishing is status.category published inside a public Collection,\nwhich emits document.published. A future published_at schedules: the public reads it only once that time has\npassed. Dedupe by slug within the collection and locale. The one mistake: changing the slug of a published\nDocument; the slug is its URL.",
+      "identity": [
+        [
+          "collection",
+          "slug",
+          "locale"
+        ]
+      ],
+      "status_categories": [
+        "draft",
+        "review",
+        "published",
+        "archived"
+      ],
+      "fields": [
+        {
+          "name": "collection",
+          "type": "ref",
+          "required": true,
+          "to": [
+            "collection"
+          ]
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "slug",
+          "type": "string",
+          "required": true,
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "index": true
+        },
+        {
+          "name": "body",
+          "type": "text",
+          "description": "Markdown; a source's native rich text stays in source.payload"
+        },
+        {
+          "name": "summary",
+          "type": "text"
+        },
+        {
+          "name": "status",
+          "type": "Status",
+          "required": true,
+          "default": {
+            "category": "draft"
+          }
+        },
+        {
+          "name": "published_at",
+          "type": "datetime",
+          "description": "set by the server on the first transition to published when absent; a future value schedules",
+          "index": true
+        },
+        {
+          "name": "authors",
+          "type": "ref",
+          "list": true,
+          "required": true,
+          "to": [
+            "member",
+            "person"
+          ],
+          "description": "at least one"
+        },
+        {
+          "name": "cover",
+          "type": "ref",
+          "to": [
+            "file"
+          ]
+        },
+        {
+          "name": "seo",
+          "type": "SEO"
+        },
+        {
+          "name": "locale",
+          "type": "string",
+          "description": "BCP 47"
+        },
+        {
+          "name": "parent",
+          "type": "ref",
+          "to": [
+            "document"
+          ],
+          "description": "docs hierarchy"
+        },
+        {
+          "name": "order",
+          "type": "int"
+        }
+      ],
+      "events": [
+        {
+          "field": "status.category",
+          "to": "published",
+          "name": "document.published"
+        }
+      ]
+    }
+  ],
+  "extensions": [
+    {
+      "model": "invoice",
+      "namespace": "billing",
+      "name": "exchange_rate",
+      "type": "decimal",
+      "description": "The rate from the invoice currency to the workspace's reporting currency at issue, as a decimal string."
+    },
+    {
+      "model": "tax_rate",
+      "namespace": "billing",
+      "name": "jurisdiction",
+      "type": "object",
+      "description": "Where the rate applies: { country (ISO 3166-1 alpha-2), region }."
+    },
+    {
+      "model": "organization",
+      "namespace": "billing",
+      "name": "legal_name",
+      "type": "string",
+      "description": "The registered legal name, when it differs from name; printed on invoices and used by the e-invoicing profile."
+    },
+    {
+      "model": "tax_rate",
+      "namespace": "billing",
+      "name": "tax_kind",
+      "type": "enum",
+      "description": "The kind of tax the rate is: VAT, GST, a sales tax, or another.",
+      "enum": [
+        "vat",
+        "gst",
+        "sales_tax",
+        "other"
+      ]
+    },
+    {
+      "model": "price",
+      "namespace": "billing",
+      "name": "tiers",
+      "type": "object",
+      "description": "Tiered or volume pricing: { scheme (graduated | volume), tiers: [ { up_to (decimal string or null for the last tier), unit_amount { amount, currency }, flat_amount { amount, currency } } ] }."
+    },
+    {
+      "model": "price",
+      "namespace": "billing",
+      "name": "trial_days",
+      "type": "int",
+      "description": "Free trial length in days granted when a subscription starts on this price."
+    },
+    {
+      "model": "price",
+      "namespace": "billing",
+      "name": "usage_based",
+      "type": "bool",
+      "description": "True when the quantity billed each period comes from metered usage rather than a fixed quantity.",
+      "index": true
+    },
+    {
+      "model": "event",
+      "namespace": "calendar",
+      "name": "exdates",
+      "type": "string",
+      "description": "RFC 5545 EXDATE: the occurrences of the series that are removed, as a comma-separated list of date-times."
+    },
+    {
+      "model": "event",
+      "namespace": "calendar",
+      "name": "rdates",
+      "type": "string",
+      "description": "RFC 5545 RDATE: extra occurrences added to the series, as a comma-separated list of date-times."
+    },
+    {
+      "model": "event",
+      "namespace": "calendar",
+      "name": "recurrence_id",
+      "type": "datetime",
+      "description": "RFC 5545 RECURRENCE-ID on a modified occurrence: the original start of the instance this record overrides; the series master is found by the shared ical:uid identifier.",
+      "index": true
+    },
+    {
+      "model": "event",
+      "namespace": "calendar",
+      "name": "reminders",
+      "type": "object",
+      "description": "Alarms before the event: { overrides: [ { method (popup, email), minutes_before (int) } ] }; absent means the calendar's default."
+    },
+    {
+      "model": "event",
+      "namespace": "calendar",
+      "name": "transparency",
+      "type": "enum",
+      "description": "RFC 5545 TRANSP: whether the event blocks time (opaque) or not (transparent).",
+      "enum": [
+        "opaque",
+        "transparent"
+      ]
+    },
+    {
+      "model": "event",
+      "namespace": "calendar",
+      "name": "visibility",
+      "type": "enum",
+      "description": "RFC 5545 CLASS: who may see the details.",
+      "enum": [
+        "public",
+        "private",
+        "confidential"
+      ]
+    },
+    {
+      "model": "product",
+      "namespace": "catalog",
+      "name": "image",
+      "type": "string",
+      "description": "The id of the File holding the product image."
+    },
+    {
+      "model": "organization",
+      "namespace": "crm",
+      "name": "annual_revenue",
+      "type": "Money",
+      "description": "Annual revenue as Money { amount, currency }, as reported or estimated."
+    },
+    {
+      "model": "deal",
+      "namespace": "crm",
+      "name": "deal_source",
+      "type": "string",
+      "description": "Where this deal came from: the channel, campaign or referral that produced the opportunity. Named deal_source because the envelope's source object holds import provenance."
+    },
+    {
+      "model": "organization",
+      "namespace": "crm",
+      "name": "employees",
+      "type": "int",
+      "description": "Number of employees; a band from the source (1-10, 11-50) is kept in source.payload."
+    },
+    {
+      "model": "organization",
+      "namespace": "crm",
+      "name": "industry",
+      "type": "string",
+      "description": "The organization's industry in the workspace's own vocabulary; every CRM ships a different picklist.",
+      "index": true
+    },
+    {
+      "model": "person",
+      "namespace": "crm",
+      "name": "lifecycle_stage",
+      "type": "enum",
+      "description": "Where this person stands in the marketing and sales lifecycle, from subscriber to evangelist (the HubSpot stages, snake_case). A lead is a Person with lifecycle_stage lead; there is no Lead model.",
+      "enum": [
+        "subscriber",
+        "lead",
+        "marketing_qualified_lead",
+        "sales_qualified_lead",
+        "opportunity",
+        "customer",
+        "evangelist",
+        "other"
+      ],
+      "index": true
+    },
+    {
+      "model": "organization",
+      "namespace": "crm",
+      "name": "lifecycle_stage",
+      "type": "enum",
+      "description": "Where this organization stands in the marketing and sales lifecycle, from subscriber to evangelist.",
+      "enum": [
+        "subscriber",
+        "lead",
+        "marketing_qualified_lead",
+        "sales_qualified_lead",
+        "opportunity",
+        "customer",
+        "evangelist",
+        "other"
+      ],
+      "index": true
+    },
+    {
+      "model": "deal",
+      "namespace": "crm",
+      "name": "line_items",
+      "type": "object",
+      "description": "The products on the deal before a quote or invoice exists: an object { lines: [ { product (a Product id), description, quantity (decimal string), unit_price { amount, currency } } ] }. Quantities and prices belong on the Invoice once one exists."
+    },
+    {
+      "model": "deal",
+      "namespace": "crm",
+      "name": "lost_reason",
+      "type": "string",
+      "description": "Why the deal was lost, in the team's own words or vocabulary."
+    },
+    {
+      "model": "person",
+      "namespace": "crm",
+      "name": "source",
+      "type": "string",
+      "description": "Where this person came from: the channel or campaign that produced the contact (organic search, referral, event, paid social)."
+    },
+    {
+      "model": "deal",
+      "namespace": "crm",
+      "name": "won_reason",
+      "type": "string",
+      "description": "Why the deal was won, in the team's own words or vocabulary."
+    },
+    {
+      "model": "message",
+      "namespace": "messaging",
+      "name": "received_at",
+      "type": "datetime",
+      "description": "When the receiving system accepted the message (the Received trace, Gmail internalDate, Graph receivedDateTime); sent_at orders the thread, this records delivery."
+    },
+    {
+      "model": "message",
+      "namespace": "messaging",
+      "name": "references",
+      "type": "string",
+      "description": "The RFC 5322 References header as written: the Message-IDs of the thread's ancestors, space-separated, for rebuilding threads of imported mail."
+    },
+    {
+      "model": "team",
+      "namespace": "org",
+      "name": "kind",
+      "type": "enum",
+      "description": "What kind of group this is in the organization chart.",
+      "enum": [
+        "team",
+        "department",
+        "cost_center",
+        "business_unit",
+        "group"
+      ]
+    },
+    {
+      "model": "team",
+      "namespace": "org",
+      "name": "lead",
+      "type": "string",
+      "description": "The id of the Member who leads the team; the envelope's owner is the accountable operator of the record itself."
+    },
+    {
+      "model": "team",
+      "namespace": "org",
+      "name": "parent",
+      "type": "string",
+      "description": "The id of the parent Team in the hierarchy.",
+      "index": true
+    },
+    {
+      "model": "ticket",
+      "namespace": "support",
+      "name": "cc",
+      "type": "object",
+      "description": "People copied on the whole ticket rather than on single messages: { participants: [ Participant ] }."
+    },
+    {
+      "model": "ticket",
+      "namespace": "support",
+      "name": "first_responded_at",
+      "type": "datetime",
+      "description": "When the team first replied to the requester; the start of SLA reporting."
+    },
+    {
+      "model": "ticket",
+      "namespace": "support",
+      "name": "kind",
+      "type": "string",
+      "description": "The ticket type in the source's vocabulary: question, incident, problem, task, feedback, or a workspace's own.",
+      "index": true
+    },
+    {
+      "model": "ticket",
+      "namespace": "support",
+      "name": "parent",
+      "type": "string",
+      "description": "The id of the parent Ticket (a problem this incident belongs to, a tracker, a follow-up source).",
+      "index": true
+    },
+    {
+      "model": "ticket",
+      "namespace": "support",
+      "name": "satisfaction",
+      "type": "object",
+      "description": "The requester's rating after resolution: { rating (int, 1 to 5), comment }."
+    },
+    {
+      "model": "task",
+      "namespace": "work",
+      "name": "estimate",
+      "type": "duration",
+      "description": "The effort estimate as an ISO 8601 duration; points and other units stay in source.payload."
+    },
+    {
+      "model": "task",
+      "namespace": "work",
+      "name": "rank",
+      "type": "string",
+      "description": "Manual ordering key within a view; lexicographic."
+    },
+    {
+      "model": "task",
+      "namespace": "work",
+      "name": "recurrence",
+      "type": "Recurrence",
+      "description": "An RFC 5545 RRULE for a task that recurs on completion; natural-language rules are translated or kept in source.payload."
+    },
+    {
+      "model": "task",
+      "namespace": "work",
+      "name": "start",
+      "type": "datetime",
+      "description": "When work is planned to start."
+    }
+  ],
+  "policies": {
+    "billing": [
+      {
+        "actions": [
+          "read"
+        ],
+        "applies_to": "invoice",
+        "enabled": true,
+        "fields": null,
+        "name": "end user reads own invoices",
+        "origin": "pack",
+        "principal": {
+          "kind": "end_user"
+        },
+        "where": {
+          "or": [
+            {
+              "counterparty": "@principal.person"
+            },
+            {
+              "counterparty": {
+                "in": "@principal.affiliated_organizations"
+              },
+              "counterparty.model": "organization"
+            }
+          ]
+        }
+      },
+      {
+        "actions": [
+          "read"
+        ],
+        "applies_to": "subscription",
+        "enabled": true,
+        "fields": null,
+        "name": "end user reads own subscriptions",
+        "origin": "pack",
+        "principal": {
+          "kind": "end_user"
+        },
+        "where": {
+          "or": [
+            {
+              "counterparty": "@principal.person"
+            },
+            {
+              "counterparty": {
+                "in": "@principal.affiliated_organizations"
+              },
+              "counterparty.model": "organization"
+            }
+          ]
+        }
+      },
+      {
+        "actions": [
+          "read"
+        ],
+        "applies_to": "payment",
+        "enabled": true,
+        "fields": null,
+        "name": "end user reads own payments",
+        "origin": "pack",
+        "principal": {
+          "kind": "end_user"
+        },
+        "where": {
+          "or": [
+            {
+              "counterparty": "@principal.person"
+            },
+            {
+              "counterparty": {
+                "in": "@principal.affiliated_organizations"
+              },
+              "counterparty.model": "organization"
+            }
+          ]
+        }
+      }
+    ],
+    "content": [
+      {
+        "actions": [
+          "read"
+        ],
+        "applies_to": "document",
+        "enabled": true,
+        "fields": null,
+        "name": "public reads published documents in public collections",
+        "origin": "pack",
+        "principal": {
+          "kind": "public"
+        },
+        "where": {
+          "and": [
+            {
+              "status.category": "published"
+            },
+            {
+              "published_at": {
+                "lte": "@now"
+              }
+            },
+            {
+              "collection": {
+                "in": {
+                  "model": "collection",
+                  "where": {
+                    "public": true
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "actions": [
+          "read"
+        ],
+        "applies_to": "collection",
+        "enabled": true,
+        "fields": null,
+        "name": "public reads public collections",
+        "origin": "pack",
+        "principal": {
+          "kind": "public"
+        },
+        "where": {
+          "public": true
+        }
+      }
+    ],
+    "core": [
+      {
+        "actions": [
+          "read",
+          "update"
+        ],
+        "applies_to": "person",
+        "enabled": true,
+        "fields": [
+          "name",
+          "emails",
+          "phones",
+          "urls",
+          "addresses",
+          "job_title",
+          "avatar",
+          "birthday",
+          "locale",
+          "timezone",
+          "description"
+        ],
+        "name": "end user reads and updates own person",
+        "origin": "pack",
+        "principal": {
+          "kind": "end_user"
+        },
+        "where": {
+          "id": "@principal.person"
+        }
+      },
+      {
+        "actions": [
+          "read"
+        ],
+        "applies_to": "note",
+        "enabled": true,
+        "fields": null,
+        "name": "end user reads own notes",
+        "origin": "pack",
+        "principal": {
+          "kind": "end_user"
+        },
+        "where": {
+          "author": "@principal.person"
+        }
+      },
+      {
+        "actions": [
+          "create"
+        ],
+        "applies_to": "note",
+        "enabled": true,
+        "fields": [
+          "body",
+          "author",
+          "about",
+          "visibility",
+          "attachments"
+        ],
+        "name": "end user comments on own person",
+        "origin": "pack",
+        "principal": {
+          "kind": "end_user"
+        },
+        "where": {
+          "and": [
+            {
+              "author": "@principal.person"
+            },
+            {
+              "about": {
+                "any": [
+                  "@principal.person"
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+    "crm": [],
+    "support": [
+      {
+        "actions": [
+          "read",
+          "create"
+        ],
+        "applies_to": "ticket",
+        "enabled": true,
+        "fields": null,
+        "name": "end user reads and creates own tickets",
+        "origin": "pack",
+        "principal": {
+          "kind": "end_user"
+        },
+        "where": {
+          "requester": "@principal.person"
+        }
+      },
+      {
+        "actions": [
+          "read"
+        ],
+        "applies_to": "message",
+        "enabled": true,
+        "fields": null,
+        "name": "end user reads messages about own tickets",
+        "origin": "pack",
+        "principal": {
+          "kind": "end_user"
+        },
+        "where": {
+          "about": {
+            "any": {
+              "model": "ticket",
+              "where": {
+                "requester": "@principal.person"
+              }
+            }
+          }
+        }
+      },
+      {
+        "actions": [
+          "read"
+        ],
+        "applies_to": "note",
+        "enabled": true,
+        "fields": null,
+        "name": "end user reads shared notes about own tickets",
+        "origin": "pack",
+        "principal": {
+          "kind": "end_user"
+        },
+        "where": {
+          "and": [
+            {
+              "visibility": "shared"
+            },
+            {
+              "about": {
+                "any": {
+                  "model": "ticket",
+                  "where": {
+                    "requester": "@principal.person"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "actions": [
+          "create"
+        ],
+        "applies_to": "message",
+        "enabled": true,
+        "fields": null,
+        "name": "end user sends messages about own tickets",
+        "origin": "pack",
+        "principal": {
+          "kind": "end_user"
+        },
+        "where": {
+          "and": [
+            {
+              "from.ref": "@principal.person"
+            },
+            {
+              "about": {
+                "any": {
+                  "model": "ticket",
+                  "where": {
+                    "requester": "@principal.person"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

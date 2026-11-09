@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "models": {
+      "type": "http",
+      "url": "${A_URL}/w/${A_WORKSPACE}/mcp",
+      "headers": {
+        "Authorization": "Bearer ${A_TOKEN}"
+      }
+    }
+  }
+}

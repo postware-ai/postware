@@ -1,0 +1,318 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:postware:core:event",
+  "title": "Event",
+  "description": "A scheduled block of time: a meeting, a call, an appointment, a reminder. One record per series; a logged call or meeting is an Event too.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+      "description": "ULID; generated when absent"
+    },
+    "model": {
+      "type": "string",
+      "description": "name@version",
+      "readOnly": true
+    },
+    "workspace": {
+      "type": "string",
+      "description": "the Workspace record id",
+      "readOnly": true
+    },
+    "revision": {
+      "type": "integer",
+      "description": "optimistic concurrency with If-Match",
+      "readOnly": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "readOnly": true
+    },
+    "created_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind: member|person|share|system, id}",
+      "readOnly": true
+    },
+    "updated_by": {
+      "$ref": "#/$defs/Principal",
+      "description": "{kind, id}",
+      "readOnly": true
+    },
+    "owner": {
+      "type": "string",
+      "description": "Member id, the accountable operator"
+    },
+    "identifiers": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "description": "Identifier[]: the crosswalk"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^([a-z0-9][a-z0-9_-]{0,63}:)?[a-z0-9][a-z0-9_-]{0,63}(/[a-z0-9][a-z0-9_-]{0,63})*$"
+      },
+      "description": "tag slugs, `namespace:slug` form"
+    },
+    "ext": {
+      "type": "object",
+      "description": "declared extensions only"
+    },
+    "source": {
+      "type": "object",
+      "description": "{system, external_id, created_at, updated_at, deleted_at?, import_run, imported_at, payload}"
+    },
+    "deleted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "soft delete",
+      "readOnly": true
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "description": {
+      "type": "string",
+      "contentMediaType": "text/markdown"
+    },
+    "period": {
+      "$ref": "#/$defs/Period",
+      "description": "start inclusive; end exclusive, omitted for a zero-duration event"
+    },
+    "timezone": {
+      "type": "string",
+      "maxLength": 4000,
+      "description": "IANA zone of start and end"
+    },
+    "all_day": {
+      "type": "boolean",
+      "default": false
+    },
+    "status": {
+      "$ref": "#/$defs/Status",
+      "x-categories": [
+        "confirmed",
+        "tentative",
+        "cancelled"
+      ],
+      "default": {
+        "category": "confirmed"
+      }
+    },
+    "location": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "conference_url": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "organizer": {
+      "$ref": "#/$defs/Participant"
+    },
+    "attendees": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Participant"
+      }
+    },
+    "recurrence": {
+      "$ref": "#/$defs/Recurrence"
+    },
+    "about": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Ref"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "model",
+    "workspace",
+    "revision",
+    "created_at",
+    "updated_at",
+    "created_by",
+    "updated_by",
+    "period",
+    "status"
+  ],
+  "additionalProperties": false,
+  "x-model": {
+    "name": "event",
+    "version": 1,
+    "group": "core",
+    "identity": [
+      [
+        "identifiers"
+      ]
+    ],
+    "status_categories": [
+      "confirmed",
+      "tentative",
+      "cancelled"
+    ],
+    "sensitivity": {},
+    "events": null,
+    "agent_context": "Event is anything with a time slot, past or future; the timeline of a Deal or a Ticket is a query over the Events,\nMessages, Notes and Tasks about it. Give a recurring Event its IANA timezone so local times survive daylight\nsaving; one Recurrence rule per series, exceptions are ext.calendar.*. Dedupe by the iCalendar uid identifier\n(system ical:uid). The one mistake: an attendee as free text when a Person or Member exists; set attendees[].ref."
+  },
+  "$defs": {
+    "Ref": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "model",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "Principal": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "member",
+            "person",
+            "share",
+            "system"
+          ]
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ]
+    },
+    "Identifier": {
+      "type": "object",
+      "properties": {
+        "system": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "value": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "primary": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "system",
+        "value"
+      ],
+      "additionalProperties": false,
+      "description": "An external or natural key. `system` is a registered scheme (email, domain, vat:eu, sha256, stripe:customer, postware:workspace)."
+    },
+    "Participant": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/Ref",
+          "x-to": [
+            "person",
+            "member"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "address": {
+          "type": "string",
+          "maxLength": 4000,
+          "description": "email address, phone number or handle, as the channel writes it"
+        },
+        "role": {
+          "type": "string",
+          "maxLength": 4000,
+          "description": "events: required, optional or resource (iCalendar ROLE and CUTYPE)"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "accepted",
+            "declined",
+            "tentative",
+            "needs_action"
+          ],
+          "description": "events: the participation status (iCalendar PARTSTAT)"
+        }
+      },
+      "additionalProperties": false,
+      "description": "A person or address taking part in a message or an event (an RFC 5322 mailbox, a JMAP EmailAddress, an iCalendar ATTENDEE or ORGANIZER). Every field is optional; ref names the Person or Member when one is known, address carries the email, phone number or handle as the channel wrote it."
+    },
+    "Period": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "end": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "start"
+      ],
+      "additionalProperties": false
+    },
+    "Recurrence": {
+      "type": "object",
+      "properties": {
+        "rrule": {
+          "type": "string",
+          "maxLength": 4000,
+          "description": "RFC 5545 RRULE"
+        }
+      },
+      "required": [
+        "rrule"
+      ],
+      "additionalProperties": false
+    },
+    "Status": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string",
+          "maxLength": 4000
+        },
+        "state": {
+          "type": "string",
+          "maxLength": 4000
+        }
+      },
+      "required": [
+        "category"
+      ],
+      "additionalProperties": false,
+      "description": "category is the standard (validated per model); state is the workspace's own label."
+    }
+  }
+}

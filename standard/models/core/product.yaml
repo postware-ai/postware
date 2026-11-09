@@ -1,0 +1,20 @@
+urn: urn:postware:core:product
+name: product
+title: Product
+version: 1
+group: core
+description: "A thing the business sells or buys: a good, a service or a digital item. What it costs lives on a Price in the Billing pack."
+agent_context: |
+  One Product per sellable thing, never one per price: the amount, currency and billing interval live on Prices
+  that reference it, and a plan billed monthly and yearly is one Product with two Prices. Dedupe by the sku
+  identifier (system sku). Inventory counts, purchase cost and ledger accounts are extensions. The one mistake:
+  deleting a Product that Invoices or Subscriptions reference; set active to false instead.
+identity:
+  - [identifiers]
+fields:
+  name:        { type: string, required: true }
+  description: { type: text }
+  kind:        { type: enum, values: [good, service, digital] }
+  unit:        { type: string, description: "default unit of measure for invoice lines: a UN/ECE Rec 20 code (C62, HUR) or a word (seat, hour)" }
+  tax_rate:    { type: ref, to: [tax_rate], description: the default tax rate for lines of this product }
+  active:      { type: bool, required: true, default: true }

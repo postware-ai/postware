@@ -1,0 +1,10 @@
+# Published extension declarations for Events: recurrence exceptions and the per-event settings calendars
+# disagree on. URN urn:postware:ext:calendar:<name>; stored at ext.calendar.<name>. The core carries one RRULE per
+# series; these declarations carry the rest of RFC 5545.
+
+- model: event
+  namespace: calendar
+  name: reminders
+  type: object
+  description: "Alarms before the event: { overrides: [ { method (popup, email), minutes_before (int) } ] }; absent means the calendar's default."
+  index: false

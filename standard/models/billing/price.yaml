@@ -1,0 +1,22 @@
+urn: urn:postware:billing:price
+name: price
+title: Price
+version: 1
+group: billing
+description: An amount at which a Product is sold, once or on a recurring interval. Subscription items and Invoice lines point at Prices.
+agent_context: |
+  interval one_time is a one-off price; any other interval with interval_count makes it recurring (month with
+  interval_count 3 bills quarterly). Metered usage, tiers and trials are ext.billing.*. Dedupe by an identifier
+  (the billing provider's price id) or by (product, name). The one mistake: changing the amount of a Price that
+  Subscriptions use; create a new Price and set active false on the old one.
+identity:
+  - [identifiers]
+  - [product, name]
+fields:
+  product:        { type: ref, to: [product], required: true }
+  name:           { type: string, description: "a short label: Monthly, Annual, 2 seats" }
+  amount:         { type: Money, required: true, description: "per unit, per interval; tax per tax_inclusive" }
+  interval:       { type: enum, values: [one_time, day, week, month, year], required: true, default: one_time }
+  interval_count: { type: int, default: 1, description: "intervals between charges; 3 with month bills quarterly" }
+  tax_inclusive:  { type: bool, required: true, default: false }
+  active:         { type: bool, required: true, default: true }
