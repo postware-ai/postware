@@ -1,6 +1,6 @@
 # Pack reference
 
-A pack is a set of models for one part of a business. Core and System are in every workspace. Each of the others stands in for a category of SaaS and is installed per workspace.
+A pack is a set of models for one part of a business. Each one replaces a category of SaaS, and every hosted workspace includes all of them.
 
 | Pack | Models | Description |
 |---|---|---|
