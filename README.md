@@ -4,7 +4,7 @@
 
 # Postware
 
-An open standard of business data models for companies run by agents.
+Open, ready-made data models and skills for customers, deals, invoices, support tickets and more.
 
 One workspace holds a company's customers, deals, invoices, subscriptions, tickets, tasks, content and files as standard records. Every agent and every product reads and writes the same models, so the company's data stays in one place and in one shape. Postware runs it for you at [postware.ai](https://postware.ai).
 
