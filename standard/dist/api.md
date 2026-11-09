@@ -388,7 +388,7 @@ Base: `{API_BASE_URL}/w/{ws}`. JSON everywhere; `Authorization: Bearer <token>` 
 |---|---|---|
 | `POST` | `/v1/file/upload-url` | Create a pending File and get where to PUT its bytes |
 | `POST` | `/v1/file/{id}/complete` | Verify size and checksum after the upload; the same bytes dedupe to one File |
-| `PUT` | `/v1/file/{id}/content` | Upload the bytes of a pending File (local storage; a presigned store answers 405) |
+| `PUT` | `/v1/file/{id}/content` | Upload the bytes of a pending File when `direct` was true in the upload-url response |
 | `GET` | `/v1/file/{id}/download` | The bytes (the signed link from download-url, or bearer auth) |
 | `GET` | `/v1/file/{id}/download-url` | A download link valid 15 minutes, usable from a plain browser |
 

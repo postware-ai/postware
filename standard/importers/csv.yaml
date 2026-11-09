@@ -1,7 +1,7 @@
 # The CSV importer manifest.
 #
 # Documents the `mapping` object accepted by POST /w/{ws}/v1/imports (docs/spec/05-api.md section 7),
-# by the `import_run` MCP tool and by `a import csv --mapping`. A CSV import maps the columns of one
+# and by the `import_run` MCP tool. A CSV import maps the columns of one
 # file onto one model: one row becomes one record, written through the ordinary write path
 # (validation, identity rules, references, extensions, tags, policies, quotas), with provenance in the
 # envelope's `source` and an ImportRun record for the whole run.
@@ -16,15 +16,14 @@ description: >
   decimal strings, enum and status values the standard's own; the agent normalises the file first.
 
 # ---------------------------------------------------------------------------------------------------
-# The request. The same object is the input of the import_run tool; `a import csv` takes the parts as
-# flags and uploads the file itself.
+# The request. The same object is the input of the import_run tool.
 request:
   source:    { type: string, required: true, description: always `csv` for this manifest }
   model: { type: string, required: true, description: "the target model's name, e.g. person" }
   file_id:   { type: string, required: true, description: the id of the uploaded File record that holds the CSV }
   mapping:   { type: object, required: true, description: the mapping object below }
   mode:      { type: enum, values: [once], default: once, description: CSV imports run once; continuous mode is for live sources }
-  dry_run:   { type: bool, default: false, description: "validate, resolve identity and evaluate policies for every row without writing" }
+  dry_run:   { type: bool, default: true, description: "validate, resolve identity and evaluate policies for every row without writing; pass false to write" }
 
 # ---------------------------------------------------------------------------------------------------
 # The mapping object.
@@ -91,7 +90,7 @@ rules:
   - Each row is validated as a create (required fields, enums, status categories, references) or as an update of the matched record; a row that fails is counted in counts.<model>.errors and listed in errors with its row number, path and code, and the run continues.
   - name.full is derived from name.given, name.middle and name.family, joined by single spaces, when a row ends up with some of those and no name.full (from a column or a constant), because contact exports never carry a full-name column.
   - Email and domain values are lower-cased before matching; nothing else is transformed.
-  - "Every written record, created or updated, and every related record a row creates, carries source = {system: csv, external_id: <the 1-based data row number, as a string>, import_run: <run id>, imported_at, payload: <the raw row as header -> cell, every column whether mapped or not>} and the tag sys:imported, added to the row's tags on a create and to the record's existing tags on an update."
+  - "Every written record, created or updated, and every related record a row creates, carries source = {system: csv, external_id: <the 1-based data row number, as a string>, import_run: <run id>, imported_at, payload: <the raw row as header -> cell, every column whether mapped or not>} and the tag sys:imported, added to the row's tags on a create. On an update, the row's tags and sys:imported are added to the record's existing tags; every other mapped field replaces its old value."
   - A row whose related record (`@model.field`) cannot be created because the principal may not create that model fails with code `forbidden`; the main record is not written either.
   - dry_run runs every step but the write and reports the same counts, errors and status in the ImportRun it returns; that ImportRun is not saved (it has no id, and GET /v1/imports finds nothing for it) and nothing else is written, not a record, a tag or an event.
   - The run's status is succeeded when every row was written, partial when some failed, failed when none could be written or the file could not be read.

@@ -40,7 +40,7 @@ fields:
       discount:    { type: Money, description: line-level discount already deducted from amount }
       tax_rate:    { type: ref, to: [tax_rate] }
       tax_amount:  { type: Money }
-      amount:      { type: Money, required: true, description: "quantity times unit_price minus discount; includes tax only when tax_inclusive" }
+      amount:      { type: Money, required: true, description: "the line total as billed: normally quantity times unit_price minus discount, including tax only when tax_inclusive; prorated or rounded lines may differ, so it is not checked against them" }
       period:      { type: Period, description: the service period the line covers }
   subtotal:       { type: Money, required: true, description: the sum of lines.amount }
   discount_total: { type: Money, description: document-level discount }

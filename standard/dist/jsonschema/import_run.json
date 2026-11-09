@@ -172,7 +172,7 @@
     "status_categories": [],
     "sensitivity": {},
     "events": null,
-    "agent_context": "An ImportRun is created by import_run or `a import`, never by hand; read it for the counts and the errors, and\nalways run with dry_run first. Find what a run wrote by querying source.import_run. The one mistake: retrying a\npartial run without reading its errors; the rows that succeeded are already upserted and simply update again."
+    "agent_context": "An ImportRun is created by the import_run tool or POST /v1/imports, never by hand; read it for the counts and the errors, and\nalways run with dry_run first. Find what a run wrote by querying source.import_run. The one mistake: retrying a\npartial run without reading its errors; the rows that succeeded are already upserted and simply update again."
   },
   "$defs": {
     "Ref": {

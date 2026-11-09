@@ -6,6 +6,11 @@ Every change to `standard/`, by standard version. Each model carries its own maj
 
 The first published version: twenty-seven models in six groups, all at major version 1. The field sets follow the model research of 6 November 2026 (vendor APIs, unified-API models and open vocabularies, in `research/models/` of the proposal repository): a field is core when the leading products agree on it and a small business needs it on day one; everything else is a declared extension.
 
+### Changed (9 November 2026)
+
+- `importers/csv.yaml`: `dry_run` defaults to true, matching the `import_run` tool; a write asks for `dry_run: false`.
+- `models/billing/invoice.yaml`: a line's `amount` is described as the total as billed; it is not checked against quantity and unit price.
+
 ### Changed (6 November 2026, after the first build)
 
 - `models/system/workspace.yaml`: the description no longer names the storage engine; where a workspace lives is the host's business, not the standard's.

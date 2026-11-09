@@ -16315,7 +16315,7 @@
       ],
       "put": {
         "operationId": "file_upload_content",
-        "summary": "Upload the bytes of a pending File (local storage; a presigned store answers 405)",
+        "summary": "Upload the bytes of a pending File when `direct` was true in the upload-url response",
         "tags": [
           "Files"
         ],
@@ -17026,7 +17026,7 @@
           "status_categories": [],
           "sensitivity": {},
           "events": null,
-          "agent_context": "An ImportRun is created by import_run or `a import`, never by hand; read it for the counts and the errors, and\nalways run with dry_run first. Find what a run wrote by querying source.import_run. The one mistake: retrying a\npartial run without reading its errors; the rows that succeeded are already upserted and simply update again."
+          "agent_context": "An ImportRun is created by the import_run tool or POST /v1/imports, never by hand; read it for the counts and the errors, and\nalways run with dry_run first. Find what a run wrote by querying source.import_run. The one mistake: retrying a\npartial run without reading its errors; the rows that succeeded are already upserted and simply update again."
         }
       },
       "Member": {
@@ -20113,7 +20113,7 @@
                 },
                 "amount": {
                   "$ref": "#/components/schemas/Money",
-                  "description": "quantity times unit_price minus discount; includes tax only when tax_inclusive"
+                  "description": "the line total as billed: normally quantity times unit_price minus discount, including tax only when tax_inclusive; prorated or rounded lines may differ, so it is not checked against them"
                 },
                 "period": {
                   "$ref": "#/components/schemas/Period",
@@ -22159,7 +22159,9 @@
             ]
           },
           "dry_run": {
-            "type": "boolean"
+            "type": "boolean",
+            "default": true,
+            "description": "validates without writing; pass false to write"
           }
         },
         "required": [

@@ -406,7 +406,7 @@
   {
     "name": "record_delete",
     "title": "Delete a record",
-    "description": "Soft-delete a record: `deleted_at` is set and it leaves lists, gets and search (record_query with `include_deleted: true` still returns it). References to it in other records are kept. Returns {deleted: true}. There is no restore and no hard delete through this tool: a hard delete is `DELETE /v1/{model}/{id}?hard=true` (admins only; `a delete --hard` from the CLI). Delete only on an explicit instruction.",
+    "description": "Soft-delete a record: `deleted_at` is set and it leaves lists, gets and search (for admins, record_query with `include_deleted: true` still returns it). References to it in other records are kept. Returns {deleted: true}. There is no restore and no hard delete through this tool: a hard delete is `DELETE /v1/{model}/{id}?hard=true`, for admins only. Delete only on an explicit instruction.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -463,7 +463,7 @@
   {
     "name": "record_batch",
     "title": "Batch operations",
-    "description": "Run up to 500 operations (create, update, upsert, delete) in one call. `atomic` (default true) rolls everything back on any failure; `dry_run` validates and evaluates policies without writing. Use dry_run first for large imports.",
+    "description": "Run up to 500 operations (create, update, upsert, delete) in one call. `atomic` (default true) rolls everything back on any failure; `dry_run` validates and evaluates policies without writing. Use dry_run first for large imports. `if_match` on an update is the revision you read; a stale one is a `conflict`.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -621,7 +621,7 @@
   {
     "name": "import_run",
     "title": "Run a CSV import",
-    "description": "Import a CSV file (uploaded first as a File record) into one model with a column mapping: {columns: {\"Email\": \"emails[0].value\", \"Company\": \"affiliations[0].organization@organization.name\"}, constants: {tags: [\"imported\"]}, identity: \"identity\"}. Returns the ImportRun with counts and errors. Always run with dry_run true first and read the errors.",
+    "description": "Import a CSV file (uploaded first as a File record) into one model with a column mapping: {columns: {\"Email\": \"emails[0].value\", \"Company\": \"affiliations[0].organization@organization.name\"}, constants: {tags: [\"imported\"]}, identity: \"identity\"}. Returns the ImportRun with counts and errors. `dry_run` defaults to true, so nothing is written until you pass `dry_run: false`: read the errors of the dry run first.",
     "inputSchema": {
       "type": "object",
       "properties": {

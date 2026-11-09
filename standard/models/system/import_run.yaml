@@ -5,7 +5,7 @@ version: 1
 group: system
 description: "One execution of an importer: which importer, in which mode, with what outcome and per-model counts. Every record it wrote carries its id in source.import_run."
 agent_context: |
-  An ImportRun is created by import_run or `a import`, never by hand; read it for the counts and the errors, and
+  An ImportRun is created by the import_run tool or POST /v1/imports, never by hand; read it for the counts and the errors, and
   always run with dry_run first. Find what a run wrote by querying source.import_run. The one mistake: retrying a
   partial run without reading its errors; the rows that succeeded are already upserted and simply update again.
 identity: []

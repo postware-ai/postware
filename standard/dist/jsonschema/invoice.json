@@ -189,7 +189,7 @@
           },
           "amount": {
             "$ref": "#/$defs/Money",
-            "description": "quantity times unit_price minus discount; includes tax only when tax_inclusive"
+            "description": "the line total as billed: normally quantity times unit_price minus discount, including tax only when tax_inclusive; prorated or rounded lines may differ, so it is not checked against them"
           },
           "period": {
             "$ref": "#/$defs/Period",

@@ -183,8 +183,8 @@ Write extensions nested, and filter on them with a dotted path: `{"ext": {"crm":
 
 - `model` is one real model. `namespace` and `name` are lowercase letters, digits and underscores, starting with a letter or underscore.
 - `type` is `string`, `text`, `bool`, `int`, `decimal`, `date`, `datetime`, `duration` or `enum` (with `enum: [...]`). To point at a record, store its id as a string.
-- Use a namespace of the company's own, never a pack's name or `sys`.
-- Declaring the same name again silently replaces it, even with a different type, so check `GET /schema/extensions` first.
+- Use a namespace of the company's own. `sys`, `cloud` and the namespaces of the standard and its packs are refused with `reserved_namespace`.
+- A declaration cannot be changed. Declaring it again unchanged does nothing; a different definition, even a new description, is `conflict`. Check `GET /schema/extensions` first.
 - A key without admin rights gets `forbidden`. Ask the person for a key with the `admin` scope. Until then use a tag or a Note.
 
 ## Queries
@@ -224,7 +224,7 @@ Use `post_record_query` when you know the field. Use `post_record_search` (`{"se
 
 ## Writes
 
-- **Create** (`post_record_create`): `{model, data, idempotency_key?}`. On HTTP use an `Idempotency-Key` header. The same key returns the first result for 24 hours.
+- **Create** (`post_record_create`): `{model, data, idempotency_key?}`. On HTTP use an `Idempotency-Key` header. The same key returns the first result for 24 hours; reused with a different body it is `conflict`.
 - **Upsert** (`post_record_upsert`): `{model, data, match?}`. Returns the record and `created`. `match` defaults to the identity rules; `{"identifiers": [{"system": ..., "value": ...}]}` matches on those instead. On HTTP, put `match` beside the fields.
 - **Update** (`post_record_update`): `{model, id, data, if_match}`. Send only the fields you change.
 - **Delete** (`post_record_delete`): `{model, id}`. Only on an explicit instruction. A Member can delete only records it created; others answer `not_found`.
@@ -239,9 +239,9 @@ Use `post_record_query` when you know the field. Use `post_record_search` (`{"se
 
 `atomic` (default true) undoes everything if one operation fails and answers with the first failure, at `operations.N`. With `atomic: false` each operation stands alone, and `results[]` gives each one a `status` and `data` or `error`. `dry_run: true` validates and evaluates permissions without writing. For a full list of problems, use `dry_run: true` with `atomic: false`.
 
-Inside a batch, `if_match` is not enforced and upsert always uses identity rules. For a change that must not overwrite someone else's, use `post_record_update`. To link records created in the same batch, set `id` yourself on the first one.
+Inside a batch, `if_match` is optional, and a stale one is `conflict`: send it on any change that must not overwrite someone else's. Upsert always uses identity rules. To link records created in the same batch, set `id` yourself on the first one.
 
-The server checks an invoice's arithmetic (`total`, `amount_due`) and a deal's stage against its pipeline. It does not update balances for you.
+The server checks an invoice's totals (`subtotal`, `total`, `amount_due`) and a deal's stage against its pipeline. It does not check each line's `amount` or update balances for you. An Invoice needs a `number` to leave draft, a Payment cannot be negative, and a Pipeline needs an open, a won and a lost stage. These rules apply when that field or status changes, so older records still save.
 
 ## Imports, exports, files
 
@@ -257,13 +257,13 @@ curl -sS -X POST "$POSTWARE_API_URL/file/FILE_ID/complete" -H "Authorization: Be
 
 Use the `id` that `complete` returns: identical bytes merge into one File, so it can differ from the first `id`. `GET /file/{id}/download-url` gives a link valid for 15 minutes. File content is never public. Link a file to a record with `about`.
 
-**CSV import.** `post_import_run` takes `{source: "csv", model, file_id, mapping, dry_run}`. Always pass `dry_run` yourself, and read `counts` and `errors` (each with `row`, `path`, `code`) before the real run. A dry run writes nothing. Files over 8 MB run in the background, so poll `GET /imports/{id}`.
+**CSV import.** `post_import_run` takes `{source: "csv", model, file_id, mapping, dry_run}`. `dry_run` defaults to true and writes nothing. Read `counts` and `errors` (each with `row`, `path`, `code`), then pass `dry_run: false` for the real run. Files over 8 MB run in the background, so poll `GET /imports/{id}`.
 
 - `mapping.columns`: header to path, such as `name.given`, `emails[0].value`, `ext.crm.source`, `tags[0]`, or `affiliations[0].organization@organization.name`. `@model.field` finds a related record by that field, case-insensitively, or creates it.
 - `mapping.constants`: a partial record merged into every row.
 - `mapping.identity`: `"identity"` to upsert, `"none"` (default) to create every row.
 - Values are copied as written: ISO dates, plain decimals, the standard's enum values. Clean the file first. `name.full` is derived from the name parts.
-- On a match, mapped fields replace the old values like any upsert. Mapping `tags` drops the record's other tags.
+- On a match, mapped fields replace the old values like any upsert, except `tags`, which are added to the record's existing tags.
 - Each row carries `source` with its import run, and the tag `sys:imported`. Find a run's records with `{"source.import_run": "RUN_ID"}`.
 
 With MCP tools only, you cannot upload. Parse the CSV yourself and send `upsert` operations through `post_record_batch`, up to 500 at a time, dry run first.
@@ -350,7 +350,7 @@ Errors are `{"error": {"code", "message", "details": [{"path", "code", "message"
 | 403 | `plan_limit` | Plan or allowance reached. The person decides |
 | 404 | `not_found` | Wrong id, deleted, or hidden from you. Query for it |
 | 405 | `unsupported`, `method_not_allowed` | That operation or method is not offered. Use the documented route |
-| 409 | `conflict` | Read the record again, reapply, retry. Also an `Idempotency-Key` reused with a different body |
+| 409 | `conflict` | Read the record again, reapply, retry. Also an `Idempotency-Key` reused with a different body, or an extension declared again differently |
 | 409 | `duplicate` | `details[0].message` is the existing id. Update that record instead |
 | 409 | `already_exists` | That `id` is taken, or the file is already uploaded |
 | 409 | `already_claimed` | Use the workspace normally |
@@ -366,7 +366,7 @@ Errors are `{"error": {"code", "message", "details": [{"path", "code", "message"
 | 501 | `unsupported` | Replay is not available. Reconnect without `after` |
 | 503 | `provisioning_unavailable` | Try again shortly |
 
-Codes in `details`: `required`, `invalid`, `invalid_type`, `invalid_enum`, `invalid_status_category` and `invalid_email` (use the listed values); `unknown_field`, `unknown_path`, `unknown_model`, `bad_path`, `bad_operator`, `bad_value`, `bad_order`, `bad_include` (read the schema); `ref_not_found`, `ref_model_not_allowed` (check the `{model, id}`); `unknown_stage`, `mismatch` (check the pipeline's stages); `total_mismatch` (redo the sums); `extension_undeclared` (declare it or remove it); `invalid_tag`, `unknown_tag`, `reserved_namespace` (fix the slug); `forbidden_field` (a policy bars that field); `too_large`, `too_long` (shorten it); `incomplete` (finish the upload); `unknown_scope` (use a listed scope).
+Codes in `details`: `required`, `invalid`, `invalid_type`, `invalid_enum`, `invalid_status_category` and `invalid_email` (use the listed values); `unknown_field`, `unknown_path`, `unknown_model`, `bad_path`, `bad_operator`, `bad_value`, `bad_order`, `bad_include` (read the schema); `ref_not_found`, `ref_model_not_allowed` (check the `{model, id}`); `unknown_stage`, `mismatch` (check the pipeline's stages); `total_mismatch` (redo the sums); `extension_undeclared` (declare it or remove it); `invalid_tag`, `unknown_tag` (fix the slug); `reserved_namespace` (use your own namespace); `forbidden_field` (a policy bars that field); `too_large`, `too_long` (shorten it); `incomplete` (finish the upload); `unknown_scope` (use a listed scope).
 
 ## Recipes
 
@@ -448,12 +448,12 @@ post_record_update { "model": "ticket", "id": "TICKET_ID", "if_match": 2, "data"
 
 ### Publish a document
 
-A Document is public when its status is `published`, its `published_at` has passed and its Collection has `public: true`. Set `published_at` yourself when you update a document to published, because it is only filled in for you on create. A future time schedules it. Publishing needs a claimed workspace, and it is visible to the world, so confirm first.
+A Document is public when its status is `published`, its `published_at` has passed and its Collection has `public: true`. The server sets `published_at` when a Document becomes published without one. Pass a future time to schedule it. Publishing needs a claimed workspace, and it is visible to the world, so confirm first.
 
 ```text
 post_record_upsert { "model": "collection", "data": { "name": "Help centre", "slug": "help", "kind": "help", "public": true } }
 post_record_upsert { "model": "document", "data": { "collection": { "model": "collection", "id": "COLLECTION_ID" }, "title": "Getting started", "slug": "getting-started", "locale": "en", "body": "# Getting started\n\nWelcome.", "authors": [{ "model": "member", "id": "MEMBER_ID" }] } }
-post_record_update { "model": "document", "id": "DOCUMENT_ID", "if_match": 1, "data": { "status": { "category": "published" }, "published_at": "2026-11-09T12:00:00Z" } }
+post_record_update { "model": "document", "id": "DOCUMENT_ID", "if_match": 1, "data": { "status": { "category": "published" } } }
 ```
 
 Check it with no key at `https://api.postware.ai/p/WORKSPACE/document?include=collection`. Do not change the `slug` of a published Document.

@@ -97,7 +97,7 @@ Declared extensions are typed attributes under `ext.<namespace>.<name>`, filtera
 | `calendar` | event | `exdates`, `rdates`, `recurrence_id`, `reminders`, `visibility`, `transparency` |
 | `org` | team | `kind`, `parent`, `lead` |
 
-Workspaces declare their own through the schema API (`POST /v1/schema/extensions`); importers keep each source's raw payload in `source.payload`. Promotion to core happens by observed use, through an RFC.
+Workspaces declare their own through the schema API (`POST /v1/schema/extensions`), in a namespace of their own; a declaration cannot be redefined; importers keep each source's raw payload in `source.payload`. Promotion to core happens by observed use, through an RFC.
 
 ## Policies in the standard
 
