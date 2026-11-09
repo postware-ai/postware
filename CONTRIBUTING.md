@@ -28,11 +28,11 @@ Signed-off-by: Firstname Lastname <you@example.com>
 
 ## Contributor licence terms
 
-The standard is included in the hosted service that Stealthmode Inc operates. For that to keep working with outside contributions, every contribution is accepted under these terms, which you agree to by submitting it:
+The standard is included in the hosted service that Stealthmode LLC operates. For that to keep working with outside contributions, every contribution is accepted under these terms, which you agree to by submitting it:
 
 1. **You keep your copyright.** Nothing here transfers ownership.
 2. **You license the contribution under Apache-2.0**, the licence of this repository.
-3. **You grant Stealthmode Inc** a perpetual, worldwide, non-exclusive, royalty-free, irrevocable licence to use, reproduce, modify, distribute and sublicense the contribution, and to **relicense it** under any terms, including inclusion in commercial and proprietary builds and in future versions of the project's licences.
+3. **You grant Stealthmode LLC** a perpetual, worldwide, non-exclusive, royalty-free, irrevocable licence to use, reproduce, modify, distribute and sublicense the contribution, and to **relicense it** under any terms, including inclusion in commercial and proprietary builds and in future versions of the project's licences.
 4. **You certify** the Developer Certificate of Origin for the contribution by signing off each commit, as above.
 
 These terms apply to schema, documentation, fixtures, code and every other contribution. If you contribute on behalf of an employer, make sure you are permitted to accept them.
