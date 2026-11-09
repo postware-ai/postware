@@ -6,7 +6,7 @@ Thank you for helping. This file covers how a change moves from an idea to a rel
 
 - `standard/`: the models, value types, extension packs, default policies, importer manifests and conformance suite. Changes here change the standard that every implementation follows, so they have the strictest rules (below).
 - `sdk/typescript`: the TypeScript SDK. The types in `src/types.ts` are generated from `standard/dist`; only the hand-written client is edited directly.
-- `skill/` and `docs/`: the coding-agent skill and the specs.
+- `skill/` and `docs/`: the agent skill and the specs.
 
 ## The flow
 

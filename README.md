@@ -8,16 +8,16 @@
 
 # Postware
 
-Give your agents ready-made data models and skills for everything your company needs, from customers and deals to invoices and support tickets. Fully hosted at [postware.ai](https://postware.ai), so you can finally ditch your SaaS stack.
+Give your agents open data models and skills for everything your company needs, from customers and deals to invoices and support tickets. Hosted cheaply at [postware.ai](https://postware.ai), so you can finally ditch your SaaS stack.
 
 **The Postware standards live in this repo, and they are open source.** The data models, specs and agent skill are all here under the Apache 2.0 license, so anyone can read them, build on them or propose a change.
 
 ## Get started
 
-Paste this into your agent. It creates a workspace, connects itself and installs the skill.
+Paste this into any AI assistant. It connects itself if it can, or walks you through it.
 
 ```text
-Set up Postware. Create a Postware cloud workspace, connect it here, install its skill, and ask me only when you need my email. Follow https://postware.ai/docs/start.md
+Set up Postware here. If you can, create a Postware cloud workspace, connect it and install its skill, asking me only for my email. If you can't, walk me through it. Follow https://postware.ai/docs/start.md
 ```
 
 Free tier included. No card needed.
