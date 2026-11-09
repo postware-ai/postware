@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/banner.png" alt="Postware: the system of record for agents." width="100%">
+  <img src="docs/readme-banner.png" alt="Postware: the system of record for agents." width="100%">
 </p>
 
 <p align="center">
