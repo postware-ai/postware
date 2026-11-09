@@ -56,7 +56,7 @@ Projection of top-level fields in the response; the envelope's `id`, `model`, `r
 
 ## 5. `search`
 
-Full text over `records_fts` for the model (FTS5, prefix matching, BM25 order unless `order` is given); combined with `where` by AND. `a_record_search` is `query` with `search` set; the HTTP endpoint `/v1/search` searches across models and returns `{model, id, snippet}`.
+Full text over `records_fts` for the model (FTS5, prefix matching, BM25 order unless `order` is given); combined with `where` by AND. `record_search` is `query` with `search` set; the HTTP endpoint `/v1/search` searches across models and returns `{model, id, snippet}`.
 
 ## 6. Response envelope
 

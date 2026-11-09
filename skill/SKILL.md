@@ -38,7 +38,7 @@ Without MCP, `GET /w/{ws}/v1/schema/{model}` returns the same document.
 
 Claude Code: copy `examples/mcp-claude-code.json` into the project's `.mcp.json`. Cursor: copy `examples/mcp-cursor.json` into `.cursor/mcp.json`. Both read the server URL, workspace and token from the environment; never paste the token into the file. The endpoint is `{POSTWARE_URL}/w/{POSTWARE_WORKSPACE}/mcp` (Streamable HTTP, bearer auth; an OAuth flow starts automatically when the client supports it and no token is set).
 
-The tools appear with the prefix `a_`: `a_schema_describe`, `a_record_query`, `a_record_get`, `a_record_create`, `a_record_update`, `a_record_upsert`, `a_record_delete`, `a_record_batch`, `a_record_search`, `a_import_run`, `a_export_run`. Resources `schema://index` and `schema://{model}` carry the model reference as Markdown.
+The tools appear with the prefix `post_`: `post_schema_describe`, `post_record_query`, `post_record_get`, `post_record_create`, `post_record_update`, `post_record_upsert`, `post_record_delete`, `post_record_batch`, `post_record_search`, `post_import_run`, `post_export_run`. Resources `schema://index` and `schema://{model}` carry the model reference as Markdown.
 
 ## 4. Scaffold the product on the SDK
 
